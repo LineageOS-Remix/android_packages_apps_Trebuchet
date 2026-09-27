@@ -58,14 +58,10 @@ public class QuickSpaceView extends FrameLayout implements AnimatorUpdateListene
     public TextView mEventTitleSubColored;
     public TextView mGreetingsExt;
     public TextView mGreetingsExtClock;
-    public ViewGroup mWeatherContentSub;
-    public ImageView mWeatherIconSub;
-    public TextView mWeatherTempSub;
     public TextView mEventTitle;
 
     public boolean mIsQuickEvent;
     public boolean mFinishedInflate;
-    public boolean mWeatherAvailable;
     public boolean mAttached;
 
     private QuickSpaceActionReceiver mActionReceiver;
@@ -88,8 +84,6 @@ public class QuickSpaceView extends FrameLayout implements AnimatorUpdateListene
         if (mEventTitle == null || (altUI && mGreetingsExt == null)) {
             prepareLayout(altUI);
         }
-        mWeatherAvailable = mController.isWeatherAvailable() && 
-                mController.getEventController().isDeviceIntroCompleted();
         loadDoubleLine(altUI);
     }
 
@@ -152,7 +146,6 @@ public class QuickSpaceView extends FrameLayout implements AnimatorUpdateListene
                 mNowPlayingIcon.setVisibility(View.GONE);
             }
         }
-        bindWeather(mWeatherContentSub, mWeatherTempSub, mWeatherIconSub);
     }
 
     private void setEventSubIcon() {
@@ -167,33 +160,13 @@ public class QuickSpaceView extends FrameLayout implements AnimatorUpdateListene
         }
     }
 
-    private final void bindWeather(View container, TextView title, ImageView icon) {
-        if (!mWeatherAvailable || mController.getEventController().isNowPlaying()) {
-            container.setVisibility(View.GONE);
-            return;
-        }
-        String weatherTemp = mController.getWeatherTemp();
-        if (weatherTemp == null || weatherTemp.isEmpty()) {
-            container.setVisibility(View.GONE);
-            return;
-        }
-        boolean hasGoogleApp = isPackageEnabled("com.google.android.googlequicksearchbox", getContext());
-        container.setVisibility(View.VISIBLE);
-        container.setOnClickListener(hasGoogleApp ? mActionReceiver.getWeatherAction() : null);
-        title.setText(weatherTemp);
-        icon.setImageDrawable(mController.getWeatherIcon());
-    }
-
     private final void loadViews() {
         mEventTitle = (TextView) findViewById(R.id.quick_event_title);
         mEventTitleSub = (TextView) findViewById(R.id.quick_event_title_sub);
         mEventTitleSubColored = (TextView) findViewById(R.id.quick_event_title_sub_colored);
         mNowPlayingIcon = (ImageView) findViewById(R.id.now_playing_icon_sub);
         mEventSubIcon = (ImageView) findViewById(R.id.quick_event_icon_sub);
-        mWeatherIconSub = (ImageView) findViewById(R.id.quick_event_weather_icon);
         mQuickspaceContent = (ViewGroup) findViewById(R.id.quickspace_content);
-        mWeatherContentSub = (ViewGroup) findViewById(R.id.quick_event_weather_content);
-        mWeatherTempSub = (TextView) findViewById(R.id.quick_event_weather_temp);
         if (Utilities.useAlternativeQuickspaceUI(getContext())) {
             mGreetingsExtClock = (TextView) findViewById(R.id.extended_greetings_clock);
             mGreetingsExt = (TextView) findViewById(R.id.extended_greetings);
@@ -215,7 +188,7 @@ public class QuickSpaceView extends FrameLayout implements AnimatorUpdateListene
 
     private void getQuickSpaceView() {
         if (mQuickspaceContent.getVisibility() != View.VISIBLE) {
-        	mQuickspaceContent.setVisibility(View.VISIBLE);
+                mQuickspaceContent.setVisibility(View.VISIBLE);
             mQuickspaceContent.setAlpha(0.0f);
             mQuickspaceContent.animate().setDuration(200).alpha(1.0f);
         }
@@ -287,7 +260,7 @@ public class QuickSpaceView extends FrameLayout implements AnimatorUpdateListene
         }
         mController.onResume();
     }
-    
+
     public void onDestroy() {
         mController.onDestroy();
         mActionReceiver = null;
@@ -300,9 +273,6 @@ public class QuickSpaceView extends FrameLayout implements AnimatorUpdateListene
         mEventTitleSubColored = null;
         mGreetingsExt = null;
         mGreetingsExtClock = null;
-        mWeatherContentSub = null;
-        mWeatherIconSub = null;
-        mWeatherTempSub = null;
         mEventTitle = null;
     }
 

@@ -164,9 +164,6 @@ public final class Utilities {
     public static final String KEY_SHOW_ALT_QUICKSPACE = "pref_show_alt_quickspace";
     public static final String KEY_SHOW_QUICKSPACE_PSONALITY = "pref_quickspace_psonality";
     public static final String KEY_SHOW_QUICKSPACE_NOWPLAYING = "pref_quickspace_np";
-    public static final String KEY_SHOW_QUICKSPACE_WEATHER = "pref_quickspace_weather";
-    public static final String KEY_SHOW_QUICKSPACE_WEATHER_CITY = "pref_quickspace_weather_city";
-    public static final String KEY_SHOW_QUICKSPACE_WEATHER_TEXT = "pref_quickspace_weather_text";
 
     /**
      * Returns true if theme is dark.
@@ -1026,18 +1023,4 @@ public final class Utilities {
         return prefs.getBoolean(KEY_SHOW_QUICKSPACE_NOWPLAYING, true);
     }
 
-    public static boolean isQuickspaceWeather(Context context) {
-        SharedPreferences prefs = LauncherPrefs.getPrefs(context.getApplicationContext());
-        return prefs.getBoolean(KEY_SHOW_QUICKSPACE_WEATHER, true);
-    }
-
-    public static boolean QuickSpaceShowCity(Context context) {
-        SharedPreferences prefs = LauncherPrefs.getPrefs(context.getApplicationContext());
-        return prefs.getBoolean(KEY_SHOW_QUICKSPACE_WEATHER_CITY, false);
-    }
-
-    public static boolean QuickSpaceShowWeatherText(Context context) {
-        SharedPreferences prefs = LauncherPrefs.getPrefs(context.getApplicationContext());
-        return prefs.getBoolean(KEY_SHOW_QUICKSPACE_WEATHER_TEXT, true);
-    }
 }
