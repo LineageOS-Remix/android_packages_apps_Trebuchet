@@ -234,6 +234,19 @@ constructor(
 
     lateinit var orientedState: RecentsOrientedState
 
+    override fun setPressed(pressed: Boolean) {
+        super.setPressed(pressed)
+        if (isAttachedToWindow) {
+            val targetScale = if (pressed) 0.97f else 1.0f
+            animate()
+                .scaleX(targetScale)
+                .scaleY(targetScale)
+                .setDuration(if (pressed) 100 else 180)
+                .setInterpolator(if (pressed) Interpolators.LINEAR else Interpolators.EMPHASIZED_DECELERATE)
+                .start()
+        }
+    }
+
     var taskViewId = UNBOUND_TASK_VIEW_ID
     var isEndQuickSwitchCuj = false
 
