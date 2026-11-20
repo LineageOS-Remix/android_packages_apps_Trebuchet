@@ -125,16 +125,16 @@
     <!-- These params are only used for hotseat items on devices that have a taskbar. -->
     <item name="taskbar_swipe_up_rect_x_stiffness" type="dimen" format="float">350</item>
     <item name="taskbar_swipe_up_rect_x_damping" type="dimen" format="float">0.9</item>
-    <item name="taskbar_swipe_up_rect_y_stiffness" type="dimen" format="float">200</item>
-    <item name="taskbar_swipe_up_rect_y_damping" type="dimen" format="float">0.78</item>
-    <item name="taskbar_swipe_up_rect_scale_stiffness" type="dimen" format="float">200</item>
+    <item name="taskbar_swipe_up_rect_y_stiffness" type="dimen" format="float">240</item>
+    <item name="taskbar_swipe_up_rect_y_damping" type="dimen" format="float">0.84</item>
+    <item name="taskbar_swipe_up_rect_scale_stiffness" type="dimen" format="float">240</item>
 
-    <item name="staggered_damping_ratio" type="dimen" format="float">0.7</item>
-    <item name="staggered_stiffness" type="dimen" format="float">150</item>
+    <item name="staggered_damping_ratio" type="dimen" format="float">0.84</item>
+    <item name="staggered_stiffness" type="dimen" format="float">260</item>
     <dimen name="unlock_staggered_velocity_dp_per_s">2dp</dimen>
 
-    <item name="hint_scale_damping_ratio" type="dimen" format="float">0.7</item>
-    <item name="hint_scale_stiffness" type="dimen" format="float">200</item>
+    <item name="hint_scale_damping_ratio" type="dimen" format="float">0.82</item>
+    <item name="hint_scale_stiffness" type="dimen" format="float">240</item>
     <dimen name="hint_scale_velocity_dp_per_s">0.3dp</dimen>
 
     <!-- Swipe up to home related -->

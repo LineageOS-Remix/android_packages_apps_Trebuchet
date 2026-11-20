@@ -24,6 +24,7 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static com.android.app.animation.Interpolators.ACCELERATE_DECELERATE;
 import static com.android.app.animation.Interpolators.DECELERATE;
 import static com.android.app.animation.Interpolators.EMPHASIZED;
+import static com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE;
 import static com.android.app.animation.Interpolators.LINEAR;
 import static com.android.app.animation.Interpolators.OVERSHOOT_1_2;
 import static com.android.launcher3.BaseActivity.EVENT_DESTROYED;
@@ -277,14 +278,14 @@ public abstract class AbsSwipeUpHandler<
             STATE_LAUNCHER_PRESENT | STATE_LAUNCHER_DRAWN | STATE_LAUNCHER_STARTED |
                     STATE_LAUNCHER_BIND_TO_SERVICE;
 
-    public static final long MAX_SWIPE_DURATION = 350;
+    public static final long MAX_SWIPE_DURATION = 280;
 
     public static final float MIN_PROGRESS_FOR_OVERVIEW = 0.7f;
     private static final float SWIPE_DURATION_MULTIPLIER =
             Math.min(1 / MIN_PROGRESS_FOR_OVERVIEW, 1 / (1 - MIN_PROGRESS_FOR_OVERVIEW));
     private static final String SCREENSHOT_CAPTURED_EVT = "ScreenshotCaptured";
 
-    public static final long RECENTS_ATTACH_DURATION = 300;
+    public static final long RECENTS_ATTACH_DURATION = 250;
 
     private static final float MAX_QUICK_SWITCH_RECENTS_SCALE_PROGRESS = 0.07f;
 
@@ -1381,6 +1382,8 @@ public abstract class AbsSwipeUpHandler<
             interpolator = ACCELERATE_DECELERATE;
         } else if (endTarget == RECENTS) {
             interpolator = OVERSHOOT_1_2;
+        } else if (endTarget == HOME) {
+            interpolator = EMPHASIZED_DECELERATE;
         } else {
             interpolator = DECELERATE;
         }
