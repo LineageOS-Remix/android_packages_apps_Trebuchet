@@ -32,6 +32,7 @@ import static com.android.launcher3.Flags.enableSmartspaceRemovalToggle;
 import static com.android.launcher3.Flags.enableWorkspaceInflation;
 import static com.android.launcher3.InvariantDeviceProfile.KEY_DRAWER_OPEN_KEYBOARD;
 import static com.android.launcher3.LauncherAnimUtils.HOTSEAT_SCALE_PROPERTY_FACTORY;
+import static com.android.launcher3.LauncherAnimUtils.SCALE_INDEX_ALL_APPS_TRANSITION;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_INDEX_WIDGET_TRANSITION;
 import static com.android.launcher3.LauncherAnimUtils.SPRING_LOADED_EXIT_DELAY;
 import static com.android.launcher3.LauncherAnimUtils.WORKSPACE_SCALE_PROPERTY_FACTORY;
@@ -330,6 +331,11 @@ public class Launcher extends StatefulActivity<LauncherState>
             WORKSPACE_SCALE_PROPERTY_FACTORY.get(SCALE_INDEX_WIDGET_TRANSITION);
     private static final FloatProperty<Hotseat> HOTSEAT_WIDGET_SCALE =
             HOTSEAT_SCALE_PROPERTY_FACTORY.get(SCALE_INDEX_WIDGET_TRANSITION);
+
+    private static final FloatProperty<Workspace<?>> WORKSPACE_ALL_APPS_SCALE =
+            WORKSPACE_SCALE_PROPERTY_FACTORY.get(SCALE_INDEX_ALL_APPS_TRANSITION);
+    private static final FloatProperty<Hotseat> HOTSEAT_ALL_APPS_SCALE =
+            HOTSEAT_SCALE_PROPERTY_FACTORY.get(SCALE_INDEX_ALL_APPS_TRANSITION);
 
     private final ModelCallbacks mModelCallbacks = createModelCallbacks();
 
@@ -2922,7 +2928,10 @@ public class Launcher extends StatefulActivity<LauncherState>
      * @param progress Transition progress from 0 to 1; where 0 => home and 1 => all apps.
      */
     public void onAllAppsTransition(float progress) {
-        // No-Op
+        float scale = Utilities.mapToRange(progress, 0f, 1f, 1f,
+                mDeviceProfile.bottomSheetWorkspaceScale, EMPHASIZED);
+        WORKSPACE_ALL_APPS_SCALE.set(getWorkspace(), scale);
+        HOTSEAT_ALL_APPS_SCALE.set(getHotseat(), scale);
     }
 
     /**

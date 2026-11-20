@@ -351,6 +351,15 @@ public class AllAppsTransitionController
                 ALL_APPS_PULL_BACK_ALPHA.set(this, ALL_APPS_PULL_BACK_ALPHA_DEFAULT);
 
                 mAllAppScale.updateValue(1f);
+                AllAppsRecyclerView rv = mAppsView.getActiveRecyclerView();
+                if (rv != null) {
+                    for (int i = 0; i < rv.getChildCount(); i++) {
+                        View child = rv.getChildAt(i);
+                        child.animate().cancel();
+                        child.setTranslationY(0f);
+                        child.setAlpha(1f);
+                    }
+                }
             });
         }
 
@@ -371,6 +380,24 @@ public class AllAppsTransitionController
         setAlphas(toState, config, builder);
         // This controls both haptics for tapping on QSB and going to all apps.
         if (ALL_APPS.equals(toState) && mLauncher.isInState(NORMAL)) {
+            AllAppsRecyclerView rv = mAppsView.getActiveRecyclerView();
+            if (rv != null) {
+                int count = rv.getChildCount();
+                int numPerRow = Math.max(1, rv.getNumAppsPerRow());
+                for (int i = 0; i < count; i++) {
+                    View child = rv.getChildAt(i);
+                    int row = i / numPerRow;
+                    child.setTranslationY(60f);
+                    child.setAlpha(0f);
+                    child.animate()
+                            .translationY(0f)
+                            .alpha(1f)
+                            .setStartDelay(row * 25L)
+                            .setDuration(280)
+                            .setInterpolator(com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE)
+                            .start();
+                }
+            }
             if (Flags.msdlFeedback()) {
                 if (config.isUserControlled()) {
                     mMSDLPlayerWrapper.playToken(MSDLToken.SWIPE_THRESHOLD_INDICATOR);

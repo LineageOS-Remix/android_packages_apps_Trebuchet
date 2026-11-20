@@ -108,6 +108,10 @@ public class AllAppsRecyclerView extends FastScrollRecyclerView {
         return mApps;
     }
 
+    public int getNumAppsPerRow() {
+        return mNumAppsPerRow;
+    }
+
     protected void updatePoolSize() {
         updatePoolSize(false);
     }

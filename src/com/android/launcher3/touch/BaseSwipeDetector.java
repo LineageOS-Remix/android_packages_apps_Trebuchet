@@ -48,7 +48,7 @@ public abstract class BaseSwipeDetector {
 
     private static final boolean DBG = false;
     private static final String TAG = "BaseSwipeDetector";
-    private static final float ANIMATION_DURATION = 750;
+    private static final float ANIMATION_DURATION = 1200;
     private static final PointF sTempPoint = new PointF();
 
     private final float mReleaseVelocity;

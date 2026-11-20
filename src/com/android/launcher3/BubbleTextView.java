@@ -362,8 +362,10 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             mIconLoadRequest = null;
         }
         // Reset any shifty arrangements in case animation is disrupted.
+        animate().cancel();
         setPivotY(0);
         setAlpha(1);
+        setScaleX(1);
         setScaleY(1);
         setTranslationY(0);
         setMaxLines(1);
@@ -633,6 +635,21 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         super.onVisibilityAggregated(isVisible);
         if (mIcon != null) {
             mIcon.setVisible(isVisible, false);
+        }
+    }
+
+    @Override
+    public void setPressed(boolean pressed) {
+        super.setPressed(pressed);
+        if (mScaleForReorderBounce == 1f && isAttachedToWindow()) {
+            float targetScale = pressed ? 0.92f : 1.0f;
+            animate()
+                    .scaleX(targetScale)
+                    .scaleY(targetScale)
+                    .setDuration(pressed ? 100 : 200)
+                    .setInterpolator(pressed ? com.android.app.animation.Interpolators.LINEAR
+                            : com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE)
+                    .start();
         }
     }
 
@@ -1411,6 +1428,9 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     @Override
     public void setReorderBounceScale(float scale) {
         mScaleForReorderBounce = scale;
+        if (scale != 1f) {
+            animate().cancel();
+        }
         super.setScaleX(scale);
         super.setScaleY(scale);
     }

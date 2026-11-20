@@ -529,7 +529,7 @@ public class DeviceProfile {
                         maxWallpaperScale, 1f, 0f, 1f, LINEAR);
             }
         } else {
-            bottomSheetWorkspaceScale = 1f;
+            bottomSheetWorkspaceScale = 0.94f;
             bottomSheetDepth = 0f;
         }
 
@@ -1540,7 +1540,7 @@ public class DeviceProfile {
 
     /** Whether All Apps should be presented on a bottom sheet. */
     public boolean shouldShowAllAppsOnSheet() {
-        return isTablet || Flags.allAppsSheetForHandheld();
+        return true;
     }
 
     private void setupAllAppsStyle(Context context) {
