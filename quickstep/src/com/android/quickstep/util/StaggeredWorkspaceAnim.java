@@ -90,7 +90,8 @@ public class StaggeredWorkspaceAnim {
 
         // Scale the translationY based on the initial velocity to better sync the workspace items
         // with the floating view.
-        float transFactor = 0.2f + 0.9f * Math.abs(velocity) / MAX_VELOCITY_PX_PER_S;
+        float cappedVelocity = Math.min(Math.abs(velocity), MAX_VELOCITY_PX_PER_S);
+        float transFactor = 0.2f + 0.9f * cappedVelocity / MAX_VELOCITY_PX_PER_S;
         mSpringTransY = transFactor * launcher.getResources()
                 .getDimensionPixelSize(R.dimen.swipe_up_max_workspace_trans_y);
 
@@ -265,7 +266,8 @@ public class StaggeredWorkspaceAnim {
         float stiffness = rp.getFloat(R.dimen.staggered_stiffness);
         float damping = rp.getFloat(R.dimen.staggered_damping_ratio);
         float endTransY = 0;
-        float springVelocity = Math.abs(mVelocity) * Math.signum(endTransY - mSpringTransY);
+        float springVelocity = Math.min(Math.abs(mVelocity), MAX_VELOCITY_PX_PER_S)
+                * Math.signum(endTransY - mSpringTransY);
         ValueAnimator springTransY = new SpringAnimationBuilder(v.getContext())
                 .setStiffness(stiffness)
                 .setDampingRatio(damping)
@@ -278,7 +280,9 @@ public class StaggeredWorkspaceAnim {
         springTransY.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                v.setTranslationY(0f);
+                if (v.getTranslationY() != 0f) {
+                    v.setTranslationY(0f);
+                }
             }
         });
         mAnimators.play(springTransY);
