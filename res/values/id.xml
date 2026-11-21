@@ -100,4 +100,11 @@
     <!-- View tag key used to store SpringAnimation data. -->
     <item type="id" name="spring_animation_tag" />
 
+    <!-- Hotseat QSB -->
+    <item type="id" name="hotseat_qsb_inner" />
+    <item type="id" name="qsb_g_icon" />
+    <item type="id" name="qsb_search_hint" />
+    <item type="id" name="qsb_mic_icon" />
+    <item type="id" name="qsb_lens_icon" />
+
 </resources>

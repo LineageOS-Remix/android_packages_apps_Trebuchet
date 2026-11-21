@@ -224,13 +224,19 @@
 
     <style name="OverviewActionButton"
         parent="@android:style/Widget.DeviceDefault.Button.Borderless">
-        <item name="android:paddingTop">4dp</item>
-        <item name="android:paddingBottom">4dp</item>
-        <item name="android:textColor">@color/overview_button</item>
-        <item name="android:drawableTint">@color/overview_button</item>
-        <item name="android:tint">?android:attr/textColorPrimary</item>
+        <item name="android:background">@drawable/bg_overview_action_button</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:minHeight">40dp</item>
+        <item name="android:textColor">@color/materialColorOnSurface</item>
+        <item name="android:drawableTint">@color/materialColorOnSurface</item>
+        <item name="android:tint">@color/materialColorOnSurface</item>
         <item name="android:drawablePadding">8dp</item>
         <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">google-sans-text-medium</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="OverviewClearAllButton" parent="@android:style/Widget.DeviceDefault.Button">
