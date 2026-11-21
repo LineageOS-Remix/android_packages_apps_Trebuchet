@@ -115,8 +115,7 @@ class ScalingWorkspaceRevealAnim(
                 MIN_SIZE
             }
 
-        // Scale the Workspace and Hotseat around the same pivot.
-        workspace.setPivotToScaleWithSelf(hotseat)
+        // Scale the Workspace around its pivot.
         animation.addFloat(
             workspace,
             WORKSPACE_SCALE_PROPERTY_FACTORY[SCALE_INDEX_WORKSPACE_STATE],
@@ -124,13 +123,10 @@ class ScalingWorkspaceRevealAnim(
             MAX_SIZE,
             SCALE_INTERPOLATOR,
         )
-        animation.addFloat(
-            hotseat,
-            HOTSEAT_SCALE_PROPERTY_FACTORY[SCALE_INDEX_WORKSPACE_STATE],
-            fromSize,
-            MAX_SIZE,
-            SCALE_INTERPOLATOR,
-        )
+
+        // Hotseat remains firmly anchored and fully visible at rest
+        HOTSEAT_SCALE_PROPERTY_FACTORY[SCALE_INDEX_WORKSPACE_STATE].set(hotseat, MAX_SIZE)
+        hotseat.alpha = MAX_ALPHA
 
         // Fade in quickly at the beginning of the animation, so the content doesn't look like it's
         // popping into existence out of nowhere.
@@ -138,12 +134,6 @@ class ScalingWorkspaceRevealAnim(
         workspace.alpha = MIN_ALPHA
         animation.setViewAlpha(
             workspace,
-            MAX_ALPHA,
-            Interpolators.clampToProgress(LINEAR, 0f, fadeClamp),
-        )
-        hotseat.alpha = MIN_ALPHA
-        animation.setViewAlpha(
-            hotseat,
             MAX_ALPHA,
             Interpolators.clampToProgress(LINEAR, 0f, fadeClamp),
         )
@@ -200,7 +190,6 @@ class ScalingWorkspaceRevealAnim(
 
         // Needed to avoid text artefacts during the scale animation.
         workspace.setLayerType(View.LAYER_TYPE_HARDWARE, null)
-        hotseat.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         animation.addListener(
             object : AnimatorListenerAdapter() {
                 override fun onAnimationCancel(animation: Animator) {
@@ -223,7 +212,6 @@ class ScalingWorkspaceRevealAnim(
                     workspace.alpha = 1.0F
 
                     workspace.setLayerType(View.LAYER_TYPE_NONE, null)
-                    hotseat.setLayerType(View.LAYER_TYPE_NONE, null)
 
                     if (Flags.coordinateWorkspaceScale()) {
                         // Reset the cached animations.

@@ -101,9 +101,8 @@ public class StaggeredWorkspaceAnim {
             Workspace<?> workspace = launcher.getWorkspace();
             Hotseat hotseat = launcher.getHotseat();
 
-            boolean staggerHotseat = !grid.isVerticalBarLayout() && !grid.isTaskbarPresent;
-            boolean staggerQsb =
-                    !grid.isVerticalBarLayout() && !(grid.isTaskbarPresent && grid.isQsbInline);
+            boolean staggerHotseat = false;
+            boolean staggerQsb = false;
             int totalRows = grid.inv.numRows + (staggerHotseat ? 1 : 0) + (staggerQsb ? 1 : 0);
 
             // Add animation for all the visible workspace pages
@@ -112,22 +111,20 @@ public class StaggeredWorkspaceAnim {
 
             boolean workspaceClipChildren = workspace.getClipChildren();
             boolean workspaceClipToPadding = workspace.getClipToPadding();
-            boolean hotseatClipChildren = hotseat.getClipChildren();
-            boolean hotseatClipToPadding = hotseat.getClipToPadding();
 
             workspace.setClipChildren(false);
             workspace.setClipToPadding(false);
-            hotseat.setClipChildren(false);
-            hotseat.setClipToPadding(false);
 
             // Set up springs for the hotseat and qsb.
             ViewGroup hotseatIcons = hotseat.getShortcutsAndWidgets();
             if (grid.isVerticalBarLayout()) {
-                for (int i = hotseatIcons.getChildCount() - 1; i >= 0; i--) {
-                    View child = hotseatIcons.getChildAt(i);
-                    CellLayoutLayoutParams lp = ((CellLayoutLayoutParams) child.getLayoutParams());
-                    addStaggeredAnimationForView(child, lp.getCellY() + 1,
-                            totalRows, duration);
+                if (staggerHotseat) {
+                    for (int i = hotseatIcons.getChildCount() - 1; i >= 0; i--) {
+                        View child = hotseatIcons.getChildAt(i);
+                        CellLayoutLayoutParams lp = ((CellLayoutLayoutParams) child.getLayoutParams());
+                        addStaggeredAnimationForView(child, lp.getCellY() + 1,
+                                totalRows, duration);
+                    }
                 }
             } else {
                 final int hotseatRow, qsbRow;
@@ -162,8 +159,6 @@ public class StaggeredWorkspaceAnim {
                 public void onAnimationEnd(Animator animation) {
                     workspace.setClipChildren(workspaceClipChildren);
                     workspace.setClipToPadding(workspaceClipToPadding);
-                    hotseat.setClipChildren(hotseatClipChildren);
-                    hotseat.setClipToPadding(hotseatClipToPadding);
                 }
             });
         }
