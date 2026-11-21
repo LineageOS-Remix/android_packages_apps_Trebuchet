@@ -39,7 +39,7 @@
 
     <style name="LauncherTheme" parent="@style/DynamicColorsBaseLauncherTheme">
         <item name="android:textColorSecondary">#DE000000</item>
-        <item name="allAppsScrimColor">@*android:color/system_neutral1_100</item>
+        <item name="allAppsScrimColor">@color/materialColorSurfaceContainerLowest</item>
         <item name="allappsHeaderProtectionColor">@*android:color/transparent</item>
         <item name="allAppsNavBarScrimColor">#66FFFFFF</item>
         <item name="allAppsSearchTextColor">@color/widget_picker_search_text_color_light</item>
@@ -62,8 +62,8 @@
         <item name="pageIndicatorDotColor">@color/page_indicator_dot_color_light</item>
         <item name="focusOutlineColor">@color/materialColorSecondaryFixed</item>
         <item name="focusInnerOutlineColor">@color/materialColorOnSecondaryFixedVariant</item>
-        <item name="folderPreviewColor">@*android:color/system_neutral1_100</item>
-        <item name="folderBackgroundColor">@*android:color/system_neutral1_100</item>
+        <item name="folderPreviewColor">@color/materialColorSurfaceContainerHigh</item>
+        <item name="folderBackgroundColor">@color/materialColorSurfaceContainerHigh</item>
         <item name="folderIconBorderColor">?android:attr/colorPrimary</item>
         <item name="isFolderDarkText">true</item>
         <item name="folderTextColor">@color/folder_text_color_light</item>
@@ -114,7 +114,7 @@
         <item name="android:textColorHint">#A0FFFFFF</item>
         <item name="android:colorControlHighlight">#19FFFFFF</item>
         <item name="android:colorPrimary">#FF212121</item>
-        <item name="allAppsScrimColor">@*android:color/system_neutral1_800</item>
+        <item name="allAppsScrimColor">@color/materialColorSurfaceContainerLowest</item>
         <item name="allappsHeaderProtectionColor">@*android:color/transparent</item>
         <item name="allAppsNavBarScrimColor">#80000000</item>
         <item name="allAppsSearchTextColor">@color/widget_picker_search_text_color_dark</item>
@@ -129,8 +129,8 @@
         <item name="notificationDotColor">@color/notification_dot_color_dark</item>
         <item name="widgetsTheme">@style/WidgetContainerTheme.Dark</item>
         <item name="pageIndicatorDotColor">@color/page_indicator_dot_color_dark</item>
-        <item name="folderPreviewColor">@*android:color/system_neutral1_800</item>
-        <item name="folderBackgroundColor">@*android:color/system_neutral1_800</item>
+        <item name="folderPreviewColor">@color/materialColorSurfaceContainerHigh</item>
+        <item name="folderBackgroundColor">@color/materialColorSurfaceContainerHigh</item>
         <item name="folderIconBorderColor">?android:attr/colorPrimary</item>
         <item name="isFolderDarkText">false</item>
         <item name="folderTextColor">@color/folder_text_color_dark</item>
@@ -302,6 +302,7 @@
         <item name="android:elevation">3dp</item>
         <item name="android:saveEnabled">false</item>
         <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="android:fontFamily">google-sans-medium</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:importantForAccessibility">no</item>
     </style>
@@ -314,6 +315,7 @@
         <item name="android:layout_gravity">center</item>
         <item name="android:focusable">true</item>
         <item name="android:gravity">center_horizontal</item>
+        <item name="android:fontFamily">google-sans-text-medium</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
         <item name="android:defaultFocusHighlightEnabled">false</item>
         <!-- No shadows in the base theme -->
@@ -375,11 +377,17 @@
 
     <style name="DropTargetButton" parent="DropTargetButtonBase" />
 
-    <style name="TextHeadline" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle" />
+    <style name="TextHeadline" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle">
+        <item name="android:fontFamily">google-sans-medium</item>
+    </style>
 
-    <style name="PrimaryHeadline" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle"/>
+    <style name="PrimaryHeadline" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle">
+        <item name="android:fontFamily">google-sans-medium</item>
+    </style>
 
-    <style name="TextTitle" parent="@android:style/TextAppearance.DeviceDefault" />
+    <style name="TextTitle" parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:fontFamily">google-sans-text-medium</item>
+    </style>
 
     <style name="Button.TopRounded.Bordered" parent="@android:style/Widget.Material.Button">
         <item name="android:background">@drawable/button_top_rounded_bordered_ripple</item>

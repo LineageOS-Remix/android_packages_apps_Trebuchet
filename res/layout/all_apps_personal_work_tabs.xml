@@ -37,6 +37,7 @@
         android:textAllCaps="false"
         android:textColor="@color/all_apps_tab_text"
         android:textSize="14sp"
+        android:fontFamily="google-sans-text-medium"
         style="?android:attr/borderlessButtonStyle" />
 
     <Button
@@ -50,5 +51,6 @@
         android:textAllCaps="false"
         android:textColor="@color/all_apps_tab_text"
         android:textSize="14sp"
+        android:fontFamily="google-sans-text-medium"
         style="?android:attr/borderlessButtonStyle" />
 </com.android.launcher3.workprofile.PersonalWorkSlidingTabStrip>

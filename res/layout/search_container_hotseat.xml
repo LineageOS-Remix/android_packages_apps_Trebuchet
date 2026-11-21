@@ -26,7 +26,7 @@
             android:layout_height="24dp"
             android:layout_gravity="center_vertical"
             android:src="@drawable/ic_google_color"
-            android:contentDescription="@string/label_application" />
+            android:contentDescription="@string/all_apps_search_bar_hint" />
 
         <TextView
             android:id="@+id/qsb_search_hint"

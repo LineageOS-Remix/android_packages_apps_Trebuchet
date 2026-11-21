@@ -180,7 +180,7 @@
 
     <!-- All Apps -->
     <!-- Search bar text in the apps view. [CHAR_LIMIT=50] -->
-    <string name="all_apps_search_bar_hint">Search apps</string>
+    <string name="all_apps_search_bar_hint">Search your phone &amp; more…</string>
     <!-- Loading apps text. [CHAR_LIMIT=50] -->
     <string name="all_apps_loading_message">Loading apps&#8230;</string>
     <!-- No-search-results text. [CHAR_LIMIT=50] -->
@@ -533,4 +533,9 @@
     <string name="ps_add_button_label">Install</string>
     <!-- Content description for install app icon -->
     <string name="ps_add_button_content_description">Install apps to Private Space</string>
+
+    <!-- Voice search action description -->
+    <string name="action_listen">Voice search</string>
+    <!-- Google Lens action description -->
+    <string name="action_translate">Google Lens</string>
 </resources>

@@ -45,6 +45,7 @@
             android:layout_weight="1"
             android:background="@android:color/transparent"
             android:gravity="center"
+            android:fontFamily="google-sans-medium"
             android:hint="@string/folder_hint_text"
             android:imeOptions="flagNoExtractUi"
             android:importantForAutofill="no"
