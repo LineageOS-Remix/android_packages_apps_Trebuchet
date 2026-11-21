@@ -213,7 +213,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
     public static final int RECENTS_LAUNCH_DURATION = 280;
     private static final int LAUNCHER_RESUME_START_DELAY = 100;
-    private static final int CLOSING_TRANSITION_DURATION_MS = 240;
+    private static final int CLOSING_TRANSITION_DURATION_MS = 300;
     public static final int SPLIT_LAUNCH_DURATION = 300;
     public static final int SPLIT_DIVIDER_ANIM_DURATION = 100;
 
@@ -1511,8 +1511,8 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         float translateY = isFreeform ? mClosingFreeformWindowTransY : mClosingWindowTransY;
         float endScale = isFreeform ? 0.95f : 1f;
         Interpolator alphaInterpolator = isFreeform
-                ? clampToDuration(LINEAR, 0, 100, duration)
-                : clampToDuration(LINEAR, 25, 125, duration);
+                ? clampToDuration(LINEAR, 0, 160, duration)
+                : clampToDuration(LINEAR, 30, 220, duration);
         closingAnimator.addUpdateListener(new MultiValueUpdateListener() {
             FloatProp mDy = new FloatProp(0, translateY, DECELERATE_1_7);
             FloatProp mScale = new FloatProp(1f, endScale, DECELERATE_1_7);
