@@ -30,6 +30,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.app.animation.Interpolators;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
 import com.android.launcher3.util.HorizontalInsettableView;
@@ -105,9 +106,21 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         Context context = getContext();
         View inner = findViewById(R.id.hotseat_qsb_inner);
         View animTarget = inner != null ? inner : this;
-        animTarget.animate().scaleX(0.97f).scaleY(0.97f).setDuration(80).withEndAction(() -> {
-            animTarget.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start();
-        }).start();
+        animTarget.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        animTarget.animate()
+                .scaleX(0.96f)
+                .scaleY(0.96f)
+                .setDuration(90)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .withEndAction(() -> {
+                    animTarget.animate()
+                            .scaleX(1.0f)
+                            .scaleY(1.0f)
+                            .setDuration(140)
+                            .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                            .withEndAction(() -> animTarget.setLayerType(View.LAYER_TYPE_NONE, null))
+                            .start();
+                }).start();
 
         Bundle opts = null;
         try {
@@ -146,9 +159,21 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         Context context = getContext();
         View mic = findViewById(R.id.qsb_mic_icon);
         if (mic != null) {
-            mic.animate().scaleX(0.85f).scaleY(0.85f).setDuration(80).withEndAction(() -> {
-                mic.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start();
-            }).start();
+            mic.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            mic.animate()
+                    .scaleX(0.85f)
+                    .scaleY(0.85f)
+                    .setDuration(90)
+                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                    .withEndAction(() -> {
+                        mic.animate()
+                                .scaleX(1.0f)
+                                .scaleY(1.0f)
+                                .setDuration(140)
+                                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                                .withEndAction(() -> mic.setLayerType(View.LAYER_TYPE_NONE, null))
+                                .start();
+                    }).start();
         }
 
         Bundle opts = null;
@@ -175,9 +200,21 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         Context context = getContext();
         View lens = findViewById(R.id.qsb_lens_icon);
         if (lens != null) {
-            lens.animate().scaleX(0.85f).scaleY(0.85f).setDuration(80).withEndAction(() -> {
-                lens.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start();
-            }).start();
+            lens.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            lens.animate()
+                    .scaleX(0.85f)
+                    .scaleY(0.85f)
+                    .setDuration(90)
+                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                    .withEndAction(() -> {
+                        lens.animate()
+                                .scaleX(1.0f)
+                                .scaleY(1.0f)
+                                .setDuration(140)
+                                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                                .withEndAction(() -> lens.setLayerType(View.LAYER_TYPE_NONE, null))
+                                .start();
+                    }).start();
         }
 
         Bundle opts = null;
