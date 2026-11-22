@@ -237,15 +237,23 @@ public class Hotseat extends CellLayout implements Insettable {
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
         DeviceProfile grid = mActivity.getDeviceProfile();
 
-        if (grid.isVerticalBarLayout()) {
+        boolean showDockSearch = LauncherPrefs.getPrefs(getContext()).getBoolean("pref_show_dock_search", true);
+
+        if (grid.isVerticalBarLayout() || !showDockSearch) {
             mQsb.setVisibility(View.GONE);
-            lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
-            if (grid.isSeascape()) {
-                lp.gravity = Gravity.LEFT;
-                lp.width = grid.hotseatBarSizePx + insets.left;
+            lp.height = grid.hotseatBarSizePx;
+            lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            if (grid.isVerticalBarLayout()) {
+                lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
+                if (grid.isSeascape()) {
+                    lp.gravity = Gravity.LEFT;
+                    lp.width = grid.hotseatBarSizePx + insets.left;
+                } else {
+                    lp.gravity = Gravity.RIGHT;
+                    lp.width = grid.hotseatBarSizePx + insets.right;
+                }
             } else {
-                lp.gravity = Gravity.RIGHT;
-                lp.width = grid.hotseatBarSizePx + insets.right;
+                lp.gravity = Gravity.BOTTOM;
             }
         } else {
             mQsb.setVisibility(View.VISIBLE);

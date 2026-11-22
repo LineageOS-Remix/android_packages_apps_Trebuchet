@@ -108,6 +108,8 @@ public class InvariantDeviceProfile implements SafeCloseable, OnSharedPreference
     public static final String KEY_SHOW_DESKTOP_LABELS = "pref_desktop_show_labels";
     public static final String KEY_SHOW_DRAWER_LABELS = "pref_drawer_show_labels";
     public static final String KEY_WORKSPACE_LOCK = "pref_workspace_lock";
+    public static final String KEY_DOCK_SEARCH = "pref_show_dock_search";
+    public static final String KEY_SMARTSPACE = "pref_smartspace_home_screen";
 
     // Constants that affects the interpolation curve between statically defined device profile
     // buckets.
@@ -365,6 +367,8 @@ public class InvariantDeviceProfile implements SafeCloseable, OnSharedPreference
             case KEY_DRAWER_OPEN_KEYBOARD:
             case KEY_SHOW_DESKTOP_LABELS:
             case KEY_SHOW_DRAWER_LABELS:
+            case KEY_DOCK_SEARCH:
+            case KEY_SMARTSPACE:
                 onConfigChanged(mContext);
                 break;
         }

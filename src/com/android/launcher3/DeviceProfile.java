@@ -217,6 +217,7 @@ public class DeviceProfile {
     public int folderChildDrawablePaddingPx;
 
     // Hotseat
+    public final Context mContext;
     public int numShownHotseatIcons;
     public int hotseatCellHeightPx;
     private int mHotseatColumnSpan;
@@ -327,6 +328,7 @@ public class DeviceProfile {
     /** Used only as an alternative to mocking when null values cannot be used. */
     @VisibleForTesting
     public DeviceProfile() {
+        mContext = null;
         inv = null;
         mInfo = null;
         mMetrics = null;
@@ -400,6 +402,7 @@ public class DeviceProfile {
             @NonNull final Consumer<DeviceProfile> dimensionOverrideProvider,
             boolean isTransientTaskbar) {
 
+        this.mContext = context;
         this.inv = inv;
         this.isLandscape = windowBounds.isLandscape();
         this.isMultiWindowMode = isMultiWindowMode;
@@ -690,6 +693,13 @@ public class DeviceProfile {
             }
         }
 
+        if (isTablet || isTaskbarPresent) {
+            int minTabletQsbSpace = pxFromDp(18, mMetrics);
+            if (hotseatQsbSpace < minTabletQsbSpace) {
+                hotseatQsbSpace = minTabletQsbSpace;
+            }
+        }
+
         springLoadedHotseatBarTopMarginPx = shouldApplyWidePortraitDimens
                 ? res.getDimensionPixelSize(R.dimen.spring_loaded_hotseat_top_margin_wide_portrait)
                 : res.getDimensionPixelSize(R.dimen.spring_loaded_hotseat_top_margin);
@@ -959,7 +969,10 @@ public class DeviceProfile {
         // Ensure there is enough space for folder icons, which have a slightly larger radius.
         hotseatCellHeightPx = getIconSizeWithOverlap(hotseatIconSizePx);
 
-        if (isVerticalBarLayout()) {
+        boolean showDockSearch = mContext == null
+                || LauncherPrefs.getPrefs(mContext).getBoolean("pref_show_dock_search", true);
+
+        if (isVerticalBarLayout() || !showDockSearch) {
             hotseatBarSizePx = hotseatIconSizePx + mHotseatBarEdgePaddingPx
                     + mHotseatBarWorkspaceSpacePx;
         } else if (isQsbInline) {
@@ -2068,8 +2081,12 @@ public class DeviceProfile {
      * Returns the number of pixels the hotseat is translated from the bottom of the screen.
      */
     private int getHotseatBarBottomPadding() {
-        if (isTaskbarPresent || isTablet) { // QSB on top or inline
+        boolean showDockSearch = mContext == null
+                || LauncherPrefs.getPrefs(mContext).getBoolean("pref_show_dock_search", true);
+        if ((isTaskbarPresent || isTablet) && showDockSearch) { // QSB on top or inline
             return hotseatBarBottomSpacePx - (Math.abs(hotseatCellHeightPx - iconSizePx) / 2);
+        } else if (isTaskbarPresent || isTablet) {
+            return (hotseatBarSizePx - hotseatCellHeightPx) / 2;
         } else {
             return hotseatBarSizePx - hotseatCellHeightPx;
         }

@@ -103,4 +103,18 @@
         android:defaultValue="true"
         android:persistent="true" />
 
+    <SwitchPreferenceCompat
+        android:key="pref_smartspace_home_screen"
+        android:title="@string/pref_at_a_glance_title"
+        android:summary="@string/pref_at_a_glance_summary"
+        android:defaultValue="true"
+        android:persistent="true" />
+
+    <SwitchPreferenceCompat
+        android:key="pref_show_dock_search"
+        android:title="@string/pref_dock_search_title"
+        android:summary="@string/pref_dock_search_summary"
+        android:defaultValue="true"
+        android:persistent="true" />
+
 </androidx.preference.PreferenceScreen>

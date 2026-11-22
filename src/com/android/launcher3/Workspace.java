@@ -606,10 +606,18 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
      * Initializes and binds the first page
      */
     public void bindAndInitFirstWorkspaceScreen() {
+        boolean showSmartspace = LauncherPrefs.getPrefs(getContext()).getBoolean(
+                "pref_smartspace_home_screen", true);
         if ((!FeatureFlags.QSB_ON_FIRST_SCREEN
                 || !mLauncher.getIsFirstPagePinnedItemEnabled())
+                || !showSmartspace
                 || SHOULD_SHOW_FIRST_PAGE_WIDGET) {
-            mFirstPagePinnedItem = null;
+            if (mFirstPagePinnedItem != null) {
+                if (mFirstPagePinnedItem.getParent() instanceof ViewGroup) {
+                    ((ViewGroup) mFirstPagePinnedItem.getParent()).removeView(mFirstPagePinnedItem);
+                }
+                mFirstPagePinnedItem = null;
+            }
             return;
         }
 
