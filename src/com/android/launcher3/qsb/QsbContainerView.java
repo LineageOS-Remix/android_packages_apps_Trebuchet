@@ -197,9 +197,56 @@ public class QsbContainerView extends FrameLayout {
         }
 
         private View createQsb(ViewGroup container) {
-            // Pixel At-A-Glance: always show the Smartspace default view (date/calendar)
-            // instead of embedding a duplicate Google Search widget at the top.
-            return getDefaultView(container, false /* show setup icon */);
+            mWidgetInfo = getSearchWidgetProvider();
+            if (mWidgetInfo == null) {
+                // There is no search provider, just show the default widget.
+                return getDefaultView(container, false /* show setup icon */);
+            }
+            Bundle opts = createBindOptions();
+            Context context = getContext();
+            AppWidgetManager widgetManager = AppWidgetManager.getInstance(context);
+
+            int widgetId = LauncherPrefs.getPrefs(context).getInt(mKeyWidgetId, -1);
+            AppWidgetProviderInfo widgetInfo = widgetManager.getAppWidgetInfo(widgetId);
+            boolean isWidgetBound = (widgetInfo != null) &&
+                    widgetInfo.provider.equals(mWidgetInfo.provider);
+
+            int oldWidgetId = widgetId;
+            if (!isWidgetBound && !isInPreviewMode()) {
+                if (widgetId > -1) {
+                    // widgetId is already bound and its not the correct provider. reset host.
+                    mQsbWidgetHost.deleteHost();
+                }
+
+                widgetId = mQsbWidgetHost.allocateAppWidgetId();
+                isWidgetBound = widgetManager.bindAppWidgetIdIfAllowed(
+                        widgetId, mWidgetInfo.getProfile(), mWidgetInfo.provider, opts);
+                if (!isWidgetBound) {
+                    mQsbWidgetHost.deleteAppWidgetId(widgetId);
+                    widgetId = -1;
+                }
+
+                if (oldWidgetId != widgetId) {
+                    saveWidgetId(widgetId);
+                }
+            }
+
+            if (isWidgetBound) {
+                mQsb = (QsbWidgetHostView) mQsbWidgetHost.createView(context, widgetId,
+                        mWidgetInfo);
+                mQsb.setId(R.id.qsb_widget);
+
+                if (!isInPreviewMode()) {
+                    if (!containsAll(AppWidgetManager.getInstance(context)
+                            .getAppWidgetOptions(widgetId), opts)) {
+                        mQsb.updateAppWidgetOptions(opts);
+                    }
+                }
+                return mQsb;
+            }
+
+            // Return a default widget with setup icon.
+            return getDefaultView(container, true /* show setup icon */);
         }
 
         private void saveWidgetId(int widgetId) {
@@ -279,7 +326,7 @@ public class QsbContainerView extends FrameLayout {
          */
         @WorkerThread
         protected AppWidgetProviderInfo getSearchWidgetProvider() {
-            return null;
+            return getSearchWidgetProviderInfo(getContext());
         }
     }
 

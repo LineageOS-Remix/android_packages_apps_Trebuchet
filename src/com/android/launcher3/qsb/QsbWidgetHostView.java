@@ -16,6 +16,7 @@
 
 package com.android.launcher3.qsb;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -93,6 +94,50 @@ public class QsbWidgetHostView extends NavigableAppWidgetHostView {
         if (searchBtn != null) {
             searchBtn.setOnClickListener((v2) ->
                     Launcher.getLauncher(v2.getContext()).startSearch("", false, null, true));
+        }
+        View gIcon = v.findViewById(R.id.qsb_g_icon);
+        if (gIcon != null) {
+            gIcon.setOnClickListener((v2) ->
+                    Launcher.getLauncher(v2.getContext()).startSearch("", false, null, true));
+        }
+        View micIcon = v.findViewById(R.id.qsb_mic_icon);
+        if (micIcon != null) {
+            micIcon.setOnClickListener((v2) -> {
+                Context context = v2.getContext();
+                Intent intent = new Intent("android.intent.action.VOICE_ASSIST")
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                try {
+                    context.startActivity(intent);
+                } catch (Exception e) {
+                    Launcher.getLauncher(context).startSearch("", false, null, true);
+                }
+            });
+        }
+        View lensIcon = v.findViewById(R.id.qsb_lens_icon);
+        if (lensIcon != null) {
+            lensIcon.setOnClickListener((v2) -> {
+                Context context = v2.getContext();
+                Intent intent = new Intent()
+                        .setComponent(new ComponentName("com.google.android.googlequicksearchbox",
+                                "com.google.android.apps.search.lens.LensActivity"))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                try {
+                    context.startActivity(intent);
+                } catch (Exception e) {
+                    try {
+                        Intent lensIntent = context.getPackageManager()
+                                .getLaunchIntentForPackage("com.google.ar.lens");
+                        if (lensIntent != null) {
+                            lensIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(lensIntent);
+                        } else {
+                            Launcher.getLauncher(context).startSearch("", false, null, true);
+                        }
+                    } catch (Exception ex) {
+                        Launcher.getLauncher(context).startSearch("", false, null, true);
+                    }
+                }
+            });
         }
         View dateView = v.findViewById(R.id.smartspace_date);
         if (dateView != null) {

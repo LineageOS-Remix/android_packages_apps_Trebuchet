@@ -1943,7 +1943,7 @@ public class DeviceProfile {
                 hotseatBarPadding.set(mHotseatBarWorkspaceSpacePx, paddingTop,
                         mInsets.right + mHotseatBarEdgePaddingPx, paddingBottom);
             }
-        } else if (isTaskbarPresent || isTablet || inv.isFixedLandscape) {
+        } else if (isTaskbarPresent || inv.isFixedLandscape) {
             // Center the QSB vertically with hotseat
             int hotseatBarBottomPadding = getHotseatBarBottomPadding();
             int hotseatBarTopPadding =
@@ -2057,7 +2057,7 @@ public class DeviceProfile {
     public int getQsbOffsetY() {
         if (isQsbInline) {
             return getHotseatBarBottomPadding() - ((hotseatQsbHeight - hotseatCellHeightPx) / 2);
-        } else if (isTaskbarPresent || isTablet) { // QSB on top
+        } else if (isTaskbarPresent) { // QSB on top
             return hotseatBarSizePx - hotseatQsbHeight + hotseatQsbShadowHeight;
         } else {
             return hotseatBarBottomSpacePx - hotseatQsbShadowHeight;
@@ -2068,7 +2068,7 @@ public class DeviceProfile {
      * Returns the number of pixels the hotseat is translated from the bottom of the screen.
      */
     private int getHotseatBarBottomPadding() {
-        if (isTaskbarPresent || isTablet) { // QSB on top or inline
+        if (isTaskbarPresent) { // QSB on top or inline
             return hotseatBarBottomSpacePx - (Math.abs(hotseatCellHeightPx - iconSizePx) / 2);
         } else {
             return hotseatBarSizePx - hotseatCellHeightPx;
