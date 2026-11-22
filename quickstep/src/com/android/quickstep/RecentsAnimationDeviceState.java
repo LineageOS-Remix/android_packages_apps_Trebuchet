@@ -41,6 +41,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_I
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_MAGNIFICATION_OVERLAP;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ONE_HANDED_ACTIVE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
@@ -425,7 +426,11 @@ public class RecentsAnimationDeviceState implements DisplayInfoChangeListener, E
                         | SYSUI_STATE_DEVICE_DREAMING
                         | SYSUI_STATE_DISABLE_GESTURE_SPLIT_INVOCATION
                         | SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING;
-        return (gestureDisablingStates & mSystemUiStateFlags) == 0 && homeOrOverviewEnabled;
+        long effectiveFlags = mSystemUiStateFlags;
+        if ((effectiveFlags & SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE) == 0) {
+            effectiveFlags &= ~(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED | SYSUI_STATE_QUICK_SETTINGS_EXPANDED);
+        }
+        return (gestureDisablingStates & effectiveFlags) == 0 && homeOrOverviewEnabled;
     }
 
     /**

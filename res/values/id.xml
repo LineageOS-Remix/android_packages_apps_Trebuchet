@@ -106,5 +106,6 @@
     <item type="id" name="qsb_search_hint" />
     <item type="id" name="qsb_mic_icon" />
     <item type="id" name="qsb_lens_icon" />
+    <item type="id" name="smartspace_date" />
 
 </resources>
