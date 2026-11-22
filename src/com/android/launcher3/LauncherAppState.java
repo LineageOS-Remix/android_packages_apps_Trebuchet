@@ -157,8 +157,7 @@ public class LauncherAppState implements SafeCloseable {
                     @Override
                     public void onSharedPreferenceChanged(
                             SharedPreferences sharedPreferences, String key) {
-                        if (SMARTSPACE_ON_HOME_SCREEN.equals(key)
-                                || "pref_show_dock_search".equals(key)) {
+                        if (SMARTSPACE_ON_HOME_SCREEN.equals(key)) {
                             mModel.forceReload();
                         }
                     }

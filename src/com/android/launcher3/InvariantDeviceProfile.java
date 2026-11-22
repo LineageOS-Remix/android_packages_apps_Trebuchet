@@ -367,8 +367,6 @@ public class InvariantDeviceProfile implements SafeCloseable, OnSharedPreference
             case KEY_DRAWER_OPEN_KEYBOARD:
             case KEY_SHOW_DESKTOP_LABELS:
             case KEY_SHOW_DRAWER_LABELS:
-            case KEY_DOCK_SEARCH:
-            case KEY_SMARTSPACE:
                 onConfigChanged(mContext);
                 break;
         }

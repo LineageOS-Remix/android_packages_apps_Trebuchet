@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -102,14 +103,28 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
 
     private void launchSearch() {
         Context context = getContext();
+        View inner = findViewById(R.id.hotseat_qsb_inner);
+        View animTarget = inner != null ? inner : this;
+        animTarget.animate().scaleX(0.97f).scaleY(0.97f).setDuration(80).withEndAction(() -> {
+            animTarget.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start();
+        }).start();
+
+        Bundle opts = null;
+        try {
+            Launcher launcher = Launcher.getLauncher(context);
+            if (launcher != null) {
+                opts = launcher.getActivityLaunchOptions(this, null).toBundle();
+            }
+        } catch (Exception ignored) {}
+
         Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         if (isPackageInstalled(GOOGLE_SEARCHBOX_PKG)) {
             intent.setPackage(GOOGLE_SEARCHBOX_PKG);
         }
         try {
-            context.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
+            context.startActivity(intent, opts);
+        } catch (Exception e) {
             try {
                 Launcher launcher = Launcher.getLauncher(context);
                 if (launcher != null) {
@@ -121,7 +136,7 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
             try {
                 Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"))
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(webIntent);
+                context.startActivity(webIntent, opts);
             } catch (Exception ignored) {
             }
         }
@@ -129,38 +144,79 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
 
     private void launchVoiceSearch() {
         Context context = getContext();
+        View mic = findViewById(R.id.qsb_mic_icon);
+        if (mic != null) {
+            mic.animate().scaleX(0.85f).scaleY(0.85f).setDuration(80).withEndAction(() -> {
+                mic.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start();
+            }).start();
+        }
+
+        Bundle opts = null;
+        try {
+            Launcher launcher = Launcher.getLauncher(context);
+            if (launcher != null) {
+                opts = launcher.getActivityLaunchOptions(mic != null ? mic : this, null).toBundle();
+            }
+        } catch (Exception ignored) {}
+
         Intent intent = new Intent("android.intent.action.VOICE_ASSIST");
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         if (isPackageInstalled(GOOGLE_SEARCHBOX_PKG)) {
             intent.setPackage(GOOGLE_SEARCHBOX_PKG);
         }
         try {
-            context.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
+            context.startActivity(intent, opts);
+        } catch (Exception e) {
             launchSearch();
         }
     }
 
     private void launchLens() {
         Context context = getContext();
-        Intent intent = new Intent();
-        intent.setComponent(new ComponentName(GOOGLE_SEARCHBOX_PKG, GOOGLE_LENS_ACTIVITY));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        try {
-            context.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            try {
-                Intent lensIntent = context.getPackageManager().getLaunchIntentForPackage(GOOGLE_LENS_PKG);
-                if (lensIntent != null) {
-                    lensIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(lensIntent);
-                } else {
-                    launchSearch();
-                }
-            } catch (Exception ex) {
-                launchSearch();
-            }
+        View lens = findViewById(R.id.qsb_lens_icon);
+        if (lens != null) {
+            lens.animate().scaleX(0.85f).scaleY(0.85f).setDuration(80).withEndAction(() -> {
+                lens.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start();
+            }).start();
         }
+
+        Bundle opts = null;
+        try {
+            Launcher launcher = Launcher.getLauncher(context);
+            if (launcher != null) {
+                opts = launcher.getActivityLaunchOptions(lens != null ? lens : this, null).toBundle();
+            }
+        } catch (Exception ignored) {}
+
+        // 1. Try standard Google Lens uri: googleapp://lens targeted at Google Search app
+        try {
+            Intent lensUriIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("googleapp://lens"))
+                    .setPackage(GOOGLE_SEARCHBOX_PKG)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(lensUriIntent, opts);
+            return;
+        } catch (Exception ignored) {}
+
+        // 2. Try googleapp://lens without package restriction
+        try {
+            Intent lensUriIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("googleapp://lens"))
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(lensUriIntent, opts);
+            return;
+        } catch (Exception ignored) {}
+
+        // 3. Try standalone Lens app (com.google.ar.lens)
+        try {
+            Intent lensIntent = context.getPackageManager().getLaunchIntentForPackage(GOOGLE_LENS_PKG);
+            if (lensIntent != null) {
+                lensIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(lensIntent, opts);
+                return;
+            }
+        } catch (Exception ignored) {}
+
+        // 4. Fallback to general search
+        launchSearch();
     }
 
     private boolean isPackageInstalled(String packageName) {

@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewDebug;
@@ -117,26 +118,42 @@ public class QsbWidgetHostView extends NavigableAppWidgetHostView {
         if (lensIcon != null) {
             lensIcon.setOnClickListener((v2) -> {
                 Context context = v2.getContext();
-                Intent intent = new Intent()
-                        .setComponent(new ComponentName("com.google.android.googlequicksearchbox",
-                                "com.google.android.apps.search.lens.LensActivity"))
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                Bundle opts = null;
                 try {
-                    context.startActivity(intent);
-                } catch (Exception e) {
-                    try {
-                        Intent lensIntent = context.getPackageManager()
-                                .getLaunchIntentForPackage("com.google.ar.lens");
-                        if (lensIntent != null) {
-                            lensIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            context.startActivity(lensIntent);
-                        } else {
-                            Launcher.getLauncher(context).startSearch("", false, null, true);
-                        }
-                    } catch (Exception ex) {
-                        Launcher.getLauncher(context).startSearch("", false, null, true);
+                    Launcher launcher = Launcher.getLauncher(context);
+                    if (launcher != null) {
+                        opts = launcher.getActivityLaunchOptions(v2, null).toBundle();
                     }
-                }
+                } catch (Exception ignored) {}
+
+                try {
+                    Intent lensUriIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("googleapp://lens"))
+                            .setPackage("com.google.android.googlequicksearchbox")
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(lensUriIntent, opts);
+                    return;
+                } catch (Exception ignored) {}
+
+                try {
+                    Intent lensUriIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("googleapp://lens"))
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(lensUriIntent, opts);
+                    return;
+                } catch (Exception ignored) {}
+
+                try {
+                    Intent lensIntent = context.getPackageManager()
+                            .getLaunchIntentForPackage("com.google.ar.lens");
+                    if (lensIntent != null) {
+                        lensIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(lensIntent, opts);
+                        return;
+                    }
+                } catch (Exception ignored) {}
+
+                try {
+                    Launcher.getLauncher(context).startSearch("", false, null, true);
+                } catch (Exception ignored) {}
             });
         }
         View dateView = v.findViewById(R.id.smartspace_date);

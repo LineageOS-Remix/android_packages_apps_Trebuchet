@@ -694,7 +694,7 @@ public class DeviceProfile {
         }
 
         if (isTablet || isTaskbarPresent) {
-            int minTabletQsbSpace = pxFromDp(18, mMetrics);
+            int minTabletQsbSpace = pxFromDp(26, mMetrics);
             if (hotseatQsbSpace < minTabletQsbSpace) {
                 hotseatQsbSpace = minTabletQsbSpace;
             }
@@ -969,10 +969,7 @@ public class DeviceProfile {
         // Ensure there is enough space for folder icons, which have a slightly larger radius.
         hotseatCellHeightPx = getIconSizeWithOverlap(hotseatIconSizePx);
 
-        boolean showDockSearch = mContext == null
-                || LauncherPrefs.getPrefs(mContext).getBoolean("pref_show_dock_search", true);
-
-        if (isVerticalBarLayout() || !showDockSearch) {
+        if (isVerticalBarLayout()) {
             hotseatBarSizePx = hotseatIconSizePx + mHotseatBarEdgePaddingPx
                     + mHotseatBarWorkspaceSpacePx;
         } else if (isQsbInline) {
@@ -2081,12 +2078,8 @@ public class DeviceProfile {
      * Returns the number of pixels the hotseat is translated from the bottom of the screen.
      */
     private int getHotseatBarBottomPadding() {
-        boolean showDockSearch = mContext == null
-                || LauncherPrefs.getPrefs(mContext).getBoolean("pref_show_dock_search", true);
-        if ((isTaskbarPresent || isTablet) && showDockSearch) { // QSB on top or inline
+        if (isTaskbarPresent || isTablet) { // QSB on top or inline
             return hotseatBarBottomSpacePx - (Math.abs(hotseatCellHeightPx - iconSizePx) / 2);
-        } else if (isTaskbarPresent || isTablet) {
-            return (hotseatBarSizePx - hotseatCellHeightPx) / 2;
         } else {
             return hotseatBarSizePx - hotseatCellHeightPx;
         }

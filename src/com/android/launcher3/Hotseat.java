@@ -23,6 +23,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -232,31 +233,50 @@ public class Hotseat extends CellLayout implements Insettable {
         animatorSet.setDuration(BUBBLE_BAR_ADJUSTMENT_ANIMATION_DURATION_MS).start();
     }
 
+    private final SharedPreferences.OnSharedPreferenceChangeListener mPrefListener =
+            (prefs, key) -> {
+                if ("pref_show_dock_search".equals(key)) {
+                    updateQsbVisibility();
+                }
+            };
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        LauncherPrefs.getPrefs(getContext()).registerOnSharedPreferenceChangeListener(mPrefListener);
+        updateQsbVisibility();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        LauncherPrefs.getPrefs(getContext()).unregisterOnSharedPreferenceChangeListener(mPrefListener);
+    }
+
+    public void updateQsbVisibility() {
+        if (mQsb == null) return;
+        DeviceProfile grid = mActivity.getDeviceProfile();
+        boolean showDockSearch = LauncherPrefs.getPrefs(getContext()).getBoolean("pref_show_dock_search", true);
+        mQsb.setVisibility((grid.isVerticalBarLayout() || !showDockSearch) ? View.GONE : View.VISIBLE);
+    }
+
     @Override
     public void setInsets(Rect insets) {
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
         DeviceProfile grid = mActivity.getDeviceProfile();
 
-        boolean showDockSearch = LauncherPrefs.getPrefs(getContext()).getBoolean("pref_show_dock_search", true);
+        updateQsbVisibility();
 
-        if (grid.isVerticalBarLayout() || !showDockSearch) {
-            mQsb.setVisibility(View.GONE);
-            lp.height = grid.hotseatBarSizePx;
-            lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
-            if (grid.isVerticalBarLayout()) {
-                lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
-                if (grid.isSeascape()) {
-                    lp.gravity = Gravity.LEFT;
-                    lp.width = grid.hotseatBarSizePx + insets.left;
-                } else {
-                    lp.gravity = Gravity.RIGHT;
-                    lp.width = grid.hotseatBarSizePx + insets.right;
-                }
+        if (grid.isVerticalBarLayout()) {
+            lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            if (grid.isSeascape()) {
+                lp.gravity = Gravity.LEFT;
+                lp.width = grid.hotseatBarSizePx + insets.left;
             } else {
-                lp.gravity = Gravity.BOTTOM;
+                lp.gravity = Gravity.RIGHT;
+                lp.width = grid.hotseatBarSizePx + insets.right;
             }
         } else {
-            mQsb.setVisibility(View.VISIBLE);
             lp.gravity = Gravity.BOTTOM;
             lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
             lp.height = grid.hotseatBarSizePx;
