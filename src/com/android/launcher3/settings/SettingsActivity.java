@@ -313,8 +313,9 @@ public class SettingsActivity extends FragmentActivity
                         // Launcher supports rotation by default. No need to show this setting.
                         return false;
                     }
-                    if (!getContext().getResources().getBoolean(
-                            com.android.internal.R.bool.config_supportAutoRotation)) {
+                    int autoRotateResId = getContext().getResources().getIdentifier(
+                            "config_supportAutoRotation", "bool", "android");
+                    if (autoRotateResId > 0 && !getContext().getResources().getBoolean(autoRotateResId)) {
                         // Not supported by the device, hide setting.
                         return false;
                     }
