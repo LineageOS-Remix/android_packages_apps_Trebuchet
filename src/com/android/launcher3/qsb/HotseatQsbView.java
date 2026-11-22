@@ -183,6 +183,12 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
                 if (info != null && info.provider.getPackageName().equals(GOOGLE_SEARCHBOX_PKG)) {
                     AppWidgetHost host = new AppWidgetHost(context, QsbContainerView.QsbFragment.QSB_WIDGET_HOST_ID);
                     mHiddenGoogleWidgetView = host.createView(context, widgetId, info);
+                    int width = context.getResources().getDisplayMetrics().widthPixels;
+                    int height = (int) (60 * context.getResources().getDisplayMetrics().density);
+                    mHiddenGoogleWidgetView.measure(
+                            View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                            View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY));
+                    mHiddenGoogleWidgetView.layout(0, 0, width, height);
                 }
             }
         } catch (Exception ignored) {}
@@ -197,34 +203,52 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
                 return null;
             }
             Context context = getContext();
-            Resources gsaRes = context.getPackageManager().getResourcesForApplication(GOOGLE_SEARCHBOX_PKG);
-            for (String buttonEntryName : buttonEntryNames) {
-                int targetId = gsaRes.getIdentifier(buttonEntryName, "id", GOOGLE_SEARCHBOX_PKG);
-                if (targetId == 0) continue;
 
-                // 1. Check workspace items if widget was placed
-                if (launcher.getWorkspace() != null) {
-                    final View[] result = new View[1];
-                    launcher.getWorkspace().mapOverItems((info, v) -> {
-                        if (result[0] != null) return true;
-                        if (v instanceof ViewGroup) {
-                            View found = v.findViewById(targetId);
+            // 1. Check workspace items if widget was placed by user
+            if (launcher.getWorkspace() != null) {
+                final View[] result = new View[1];
+                launcher.getWorkspace().mapOverItems((info, v) -> {
+                    if (result[0] != null) return true;
+                    if (v instanceof ViewGroup vg) {
+                        for (String entryName : buttonEntryNames) {
+                            View found = findViewByEntryName(vg, entryName);
                             if (found != null) {
                                 result[0] = found;
                                 return true;
                             }
                         }
-                        return false;
-                    });
-                    if (result[0] != null) {
-                        return result[0];
+                    }
+                    return false;
+                });
+                if (result[0] != null) {
+                    return result[0];
+                }
+            }
+
+            // 2. Check QsbFragment bound widget view
+            View boundQsb = QsbContainerView.QsbFragment.getBoundQsbWidgetView();
+            if (boundQsb instanceof ViewGroup vg) {
+                if (vg.getWidth() == 0 || vg.getHeight() == 0) {
+                    int width = context.getResources().getDisplayMetrics().widthPixels;
+                    int height = (int) (60 * context.getResources().getDisplayMetrics().density);
+                    vg.measure(
+                            View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                            View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY));
+                    vg.layout(0, 0, width, height);
+                }
+                for (String entryName : buttonEntryNames) {
+                    View found = findViewByEntryName(vg, entryName);
+                    if (found != null) {
+                        return found;
                     }
                 }
+            }
 
-                // 2. Check cached QSB widget host view
-                View hidden = getHiddenGoogleWidgetView();
-                if (hidden != null) {
-                    View found = hidden.findViewById(targetId);
+            // 3. Check cached QSB widget host view
+            View hidden = getHiddenGoogleWidgetView();
+            if (hidden instanceof ViewGroup vg) {
+                for (String entryName : buttonEntryNames) {
+                    View found = findViewByEntryName(vg, entryName);
                     if (found != null) {
                         return found;
                     }
@@ -234,6 +258,32 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         } catch (Exception ignored) {
             return null;
         }
+    }
+
+    @Nullable
+    private View findViewByEntryName(View root, String entryName) {
+        if (root == null) return null;
+        try {
+            if (root.getId() != View.NO_ID && root.getResources() != null) {
+                String name = root.getResources().getResourceEntryName(root.getId());
+                if (entryName.equals(name)) return root;
+            }
+        } catch (Exception ignored) {}
+        try {
+            Context context = getContext();
+            Resources gsaRes = context.getPackageManager().getResourcesForApplication(GOOGLE_SEARCHBOX_PKG);
+            int id = gsaRes.getIdentifier(entryName, "id", GOOGLE_SEARCHBOX_PKG);
+            if (id != 0 && root.getId() == id) {
+                return root;
+            }
+        } catch (Exception ignored) {}
+        if (root instanceof ViewGroup vg) {
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                View child = findViewByEntryName(vg.getChildAt(i), entryName);
+                if (child != null) return child;
+            }
+        }
+        return null;
     }
 
     private void launchSearch() {
@@ -421,6 +471,23 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
                 context.startActivity(lensIntent);
                 return;
             }
+        } catch (Exception ignored) {}
+
+        // 4. Try googleapp://lens and https://lens.google/trylens deeplinks
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("googleapp://lens"))
+                    .setPackage(GOOGLE_SEARCHBOX_PKG)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+            return;
+        } catch (Exception ignored) {}
+
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://lens.google/trylens"))
+                    .setPackage(GOOGLE_SEARCHBOX_PKG)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+            return;
         } catch (Exception ignored) {}
 
         launchSearch();

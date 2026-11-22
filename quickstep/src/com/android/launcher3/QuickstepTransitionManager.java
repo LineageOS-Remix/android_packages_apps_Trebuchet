@@ -1393,6 +1393,12 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
         // Get floating view and target rect.
         boolean isInHotseat = false;
+        boolean isQsbView = launcherView != null && (
+                launcherView instanceof com.android.launcher3.qsb.HotseatQsbView
+                || launcherView.getId() == R.id.hotseat_qsb_inner
+                || (mLauncher.getHotseat() != null && launcherView == mLauncher.getHotseat().getQsb())
+        );
+
         if (launcherView instanceof LauncherAppWidgetHostView) {
             Size windowSize = new Size(mDeviceProfile.availableWidthPx,
                     mDeviceProfile.availableHeightPx);
@@ -1402,6 +1408,15 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                     (LauncherAppWidgetHostView) launcherView, targetRect, windowSize,
                     mDeviceProfile.isMultiWindowMode ? 0 : getWindowCornerRadius(mLauncher),
                     isTransluscent, fallbackBackgroundColor);
+        } else if (isQsbView) {
+            View qsbTarget = launcherView.findViewById(R.id.hotseat_qsb_inner);
+            if (qsbTarget == null) {
+                qsbTarget = launcherView;
+            }
+            Rect viewBounds = new Rect();
+            mDragLayer.getDescendantRectRelativeToSelf(qsbTarget, viewBounds);
+            targetRect.set(viewBounds);
+            isInHotseat = true;
         } else if (launcherView != null && mAreAnimationsEnabled) {
             floatingIconView = getFloatingIconView(mLauncher, launcherView, null,
                     mLauncher.getTaskbarUIController() == null
@@ -2201,7 +2216,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 float startWindowCornerRadius) {
             mAppTargets = appTargets;
             mStartRadius = startWindowCornerRadius;
-            mEndRadius = Math.max(1, targetRect.width()) / 2f;
+            mEndRadius = Math.min(Math.max(1, targetRect.width()), Math.max(1, targetRect.height())) / 2f;
             mSurfaceApplier = new SurfaceTransactionApplier(mDragLayer);
             mWindowStartBounds.set(closingWindowStartRect);
             mWindowOriginalBounds.set(closingWindowOriginalRect);

@@ -2476,6 +2476,30 @@ public class Launcher extends StatefulActivity<LauncherState>
     public @Nullable View getFirstMatchForAppClose(
             @Nullable StableViewInfo svi, String packageName,
             UserHandle user, boolean supportsAllAppsState) {
+        if ("com.google.android.googlequicksearchbox".equals(packageName)) {
+            final View[] workspaceWidget = new View[1];
+            if (mWorkspace != null) {
+                mWorkspace.mapOverItems((info, v) -> {
+                    if (workspaceWidget[0] != null) return true;
+                    if (info instanceof LauncherAppWidgetInfo widgetInfo
+                            && widgetInfo.providerName != null
+                            && "com.google.android.googlequicksearchbox".equals(
+                                    widgetInfo.providerName.getPackageName())) {
+                        workspaceWidget[0] = v;
+                        return true;
+                    }
+                    return false;
+                });
+            }
+            if (workspaceWidget[0] != null) {
+                return workspaceWidget[0];
+            }
+            if (mHotseat != null && mHotseat.getQsb() != null) {
+                View inner = mHotseat.getQsb().findViewById(R.id.hotseat_qsb_inner);
+                return inner != null ? inner : mHotseat.getQsb();
+            }
+        }
+
         final Predicate<ItemInfo> preferredItem = svi == null ? i -> false : svi::matches;
         final Predicate<ItemInfo> packageAndUserAndApp = info ->
                 info != null

@@ -196,10 +196,63 @@ public class QsbContainerView extends FrameLayout {
             return mWrapper;
         }
 
+        private static QsbWidgetHostView sQsbWidgetView;
+
+        public static @Nullable QsbWidgetHostView getBoundQsbWidgetView() {
+            return sQsbWidgetView;
+        }
+
         private View createQsb(ViewGroup container) {
+            bindGoogleWidgetInBackground(container);
             // Pixel At-A-Glance: always show the Smartspace default view (date/calendar)
             // instead of embedding a duplicate Google Search widget at the top.
             return getDefaultView(container, false /* show setup icon */);
+        }
+
+        private void bindGoogleWidgetInBackground(ViewGroup container) {
+            try {
+                Context context = getContext();
+                if (context == null) return;
+                mWidgetInfo = getSearchWidgetProvider();
+                if (mWidgetInfo == null) return;
+
+                AppWidgetManager widgetManager = AppWidgetManager.getInstance(context);
+                int widgetId = LauncherPrefs.getPrefs(context).getInt(mKeyWidgetId, -1);
+                AppWidgetProviderInfo widgetInfo = widgetId != -1 ? widgetManager.getAppWidgetInfo(widgetId) : null;
+                boolean isWidgetBound = (widgetInfo != null)
+                        && widgetInfo.provider.equals(mWidgetInfo.provider);
+
+                if (!isWidgetBound && !isInPreviewMode()) {
+                    if (widgetId > -1) {
+                        mQsbWidgetHost.deleteHost();
+                    }
+                    widgetId = mQsbWidgetHost.allocateAppWidgetId();
+                    Bundle opts = createBindOptions();
+                    isWidgetBound = widgetManager.bindAppWidgetIdIfAllowed(
+                            widgetId, mWidgetInfo.getProfile(), mWidgetInfo.provider, opts);
+                    if (isWidgetBound) {
+                        saveWidgetId(widgetId);
+                    } else {
+                        mQsbWidgetHost.deleteAppWidgetId(widgetId);
+                        widgetId = -1;
+                    }
+                }
+
+                if (isWidgetBound) {
+                    mQsb = (QsbWidgetHostView) mQsbWidgetHost.createView(context, widgetId, mWidgetInfo);
+                    mQsb.setId(R.id.qsb_widget);
+                    if (!isInPreviewMode()) {
+                        Bundle opts = createBindOptions();
+                        if (!containsAll(AppWidgetManager.getInstance(context)
+                                .getAppWidgetOptions(widgetId), opts)) {
+                            mQsb.updateAppWidgetOptions(opts);
+                        }
+                    }
+                    mQsb.setVisibility(View.INVISIBLE);
+                    container.addView(mQsb);
+                    sQsbWidgetView = mQsb;
+                }
+            } catch (Exception ignored) {}
         }
 
         private void saveWidgetId(int widgetId) {
@@ -228,6 +281,9 @@ public class QsbContainerView extends FrameLayout {
 
         @Override
         public void onDestroy() {
+            if (sQsbWidgetView == mQsb) {
+                sQsbWidgetView = null;
+            }
             mQsbWidgetHost.stopListening();
             super.onDestroy();
         }
@@ -279,7 +335,7 @@ public class QsbContainerView extends FrameLayout {
          */
         @WorkerThread
         protected AppWidgetProviderInfo getSearchWidgetProvider() {
-            return null;
+            return getSearchWidgetProviderInfo(getContext());
         }
     }
 
