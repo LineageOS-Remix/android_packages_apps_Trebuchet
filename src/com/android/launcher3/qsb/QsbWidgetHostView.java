@@ -139,24 +139,6 @@ public class QsbWidgetHostView extends NavigableAppWidgetHostView {
                 }
             });
         }
-        View dateView = v.findViewById(R.id.smartspace_date);
-        if (dateView != null) {
-            dateView.setOnClickListener((v2) -> {
-                Context c = v2.getContext();
-                Intent intent = new Intent(Intent.ACTION_MAIN)
-                        .addCategory(Intent.CATEGORY_APP_CALENDAR)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                try {
-                    c.startActivity(intent);
-                } catch (Exception e) {
-                    try {
-                        c.startActivity(new Intent(Intent.ACTION_VIEW)
-                                .setData(android.net.Uri.parse("content://com.android.calendar/time"))
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-                    } catch (Exception ignored) {}
-                }
-            });
-        }
         return v;
     }
 
