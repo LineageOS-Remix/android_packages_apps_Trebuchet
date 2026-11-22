@@ -40,7 +40,7 @@
             android:maxLines="1"
             android:ellipsize="end"
             android:fontFamily="google-sans-text-medium"
-            android:text="@string/all_apps_search_bar_hint"
+            android:text=""
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="15sp" />
 

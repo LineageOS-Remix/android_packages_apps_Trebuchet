@@ -305,4 +305,6 @@
     
     <color name="primaryBackground">#ffffffff</color>
     <color name="primaryForeground">#ff000000</color>
+
+    <color name="qsb_hotseat_bg">#D9F0F2F5</color>
 </resources>
