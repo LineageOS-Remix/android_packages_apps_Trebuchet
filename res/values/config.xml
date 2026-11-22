@@ -99,38 +99,38 @@
     <item name="dismiss_task_trans_y_damping_ratio" type="dimen" format="float">0.73</item>
     <item name="dismiss_task_trans_y_stiffness" type="dimen" format="float">800</item>
 
-    <item name="swipe_up_rect_scale_damping_ratio" type="dimen" format="float">1.0</item>
-    <item name="swipe_up_rect_scale_stiffness" type="dimen" format="float">380</item>
-    <item name="swipe_up_rect_scale_higher_stiffness" type="dimen" format="float">450</item>
+    <item name="swipe_up_rect_scale_damping_ratio" type="dimen" format="float">0.85</item>
+    <item name="swipe_up_rect_scale_stiffness" type="dimen" format="float">320</item>
+    <item name="swipe_up_rect_scale_higher_stiffness" type="dimen" format="float">360</item>
     <!-- Flag: enableScalingRevealHomeAnimation() -->
-    <item name="swipe_up_rect_scale_damping_ratio_v2" type="dimen" format="float">1.0</item>
-    <item name="swipe_up_rect_scale_stiffness_v2" type="dimen" format="float">500</item>
+    <item name="swipe_up_rect_scale_damping_ratio_v2" type="dimen" format="float">0.85</item>
+    <item name="swipe_up_rect_scale_stiffness_v2" type="dimen" format="float">340</item>
 
     <item name="swipe_up_rect_xy_fling_friction" type="dimen" format="float">1.5</item>
 
     <item name="swipe_up_scale_start"  type="dimen" format="float">0.88</item>
 
-    <item name="swipe_up_rect_xy_damping_ratio" type="dimen" format="float">1.0</item>
-    <item name="swipe_up_rect_xy_stiffness" type="dimen" format="float">380</item>
+    <item name="swipe_up_rect_xy_damping_ratio" type="dimen" format="float">0.85</item>
+    <item name="swipe_up_rect_xy_stiffness" type="dimen" format="float">320</item>
     <!-- Flag: enableScalingRevealHomeAnimation() -->
-    <item name="swipe_up_rect_x_damping_ratio" type="dimen" format="float">1.0</item>
-    <item name="swipe_up_rect_x_stiffness" type="dimen" format="float">450</item>
-    <item name="swipe_up_rect_y_damping_ratio" type="dimen" format="float">1.0</item>
-    <item name="swipe_up_rect_y_stiffness" type="dimen" format="float">420</item>
+    <item name="swipe_up_rect_x_damping_ratio" type="dimen" format="float">0.85</item>
+    <item name="swipe_up_rect_x_stiffness" type="dimen" format="float">340</item>
+    <item name="swipe_up_rect_y_damping_ratio" type="dimen" format="float">0.85</item>
+    <item name="swipe_up_rect_y_stiffness" type="dimen" format="float">320</item>
 
     <!-- Taskbar -->
     <!-- This is a float because it is converted to dp later in DeviceProfile -->
     <item name="taskbar_icon_size" type="dimen" format="float">0</item>
 
     <!-- These params are only used for hotseat items on devices that have a taskbar. -->
-    <item name="taskbar_swipe_up_rect_x_stiffness" type="dimen" format="float">380</item>
-    <item name="taskbar_swipe_up_rect_x_damping" type="dimen" format="float">1.0</item>
-    <item name="taskbar_swipe_up_rect_y_stiffness" type="dimen" format="float">360</item>
-    <item name="taskbar_swipe_up_rect_y_damping" type="dimen" format="float">1.0</item>
-    <item name="taskbar_swipe_up_rect_scale_stiffness" type="dimen" format="float">380</item>
+    <item name="taskbar_swipe_up_rect_x_stiffness" type="dimen" format="float">320</item>
+    <item name="taskbar_swipe_up_rect_x_damping" type="dimen" format="float">0.85</item>
+    <item name="taskbar_swipe_up_rect_y_stiffness" type="dimen" format="float">300</item>
+    <item name="taskbar_swipe_up_rect_y_damping" type="dimen" format="float">0.85</item>
+    <item name="taskbar_swipe_up_rect_scale_stiffness" type="dimen" format="float">320</item>
 
-    <item name="staggered_damping_ratio" type="dimen" format="float">1.0</item>
-    <item name="staggered_stiffness" type="dimen" format="float">350</item>
+    <item name="staggered_damping_ratio" type="dimen" format="float">0.88</item>
+    <item name="staggered_stiffness" type="dimen" format="float">300</item>
     <dimen name="unlock_staggered_velocity_dp_per_s">2dp</dimen>
 
     <item name="hint_scale_damping_ratio" type="dimen" format="float">1.0</item>
