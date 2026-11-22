@@ -2465,17 +2465,17 @@ public class Launcher extends StatefulActivity<LauncherState>
      * @param supportsAllAppsState If true and we are in All Apps state, looks for view in All Apps.
      *                             Else we only looks on the workspace.
      */
+    /**
+     * Start activity for result directly from Launcher without routing through ProxyActivityStarter.
+     * This preserves the caller package and task record needed by Google Lens and similar callers.
+     */
+    public void startActivityForResultDirect(Intent intent, int requestCode, Bundle options) {
+        super.startActivityForResult(intent, requestCode, options);
+    }
+
     public @Nullable View getFirstMatchForAppClose(
             @Nullable StableViewInfo svi, String packageName,
             UserHandle user, boolean supportsAllAppsState) {
-        if (TextUtils.equals("com.google.android.googlequicksearchbox", packageName)) {
-            Hotseat hotseat = mWorkspace != null ? mWorkspace.getHotseat() : null;
-            if (hotseat != null && hotseat.getQsb() != null && hotseat.getQsb().getVisibility() == View.VISIBLE) {
-                View inner = hotseat.getQsb().findViewById(R.id.hotseat_qsb_inner);
-                return inner != null ? inner : hotseat.getQsb();
-            }
-        }
-
         final Predicate<ItemInfo> preferredItem = svi == null ? i -> false : svi::matches;
         final Predicate<ItemInfo> packageAndUserAndApp = info ->
                 info != null

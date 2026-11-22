@@ -171,12 +171,6 @@ class ScalingWorkspaceRevealAnim(
                 MAX_SIZE,
                 SCALE_INTERPOLATOR,
             )
-            qsb.alpha = MIN_ALPHA
-            animation.setViewAlpha(
-                qsb,
-                MAX_ALPHA,
-                Interpolators.clampToProgress(LINEAR, 0f, fadeClamp),
-            )
         }
 
         val transitionConfig = StateAnimationConfig()

@@ -168,9 +168,17 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         }
         try {
             Context context = getContext();
+            AppWidgetManager wm = AppWidgetManager.getInstance(context);
             int widgetId = LauncherPrefs.getPrefs(context).getInt("qsb_widget_id", -1);
+            if (widgetId == -1) {
+                ComponentName provider = new ComponentName(GOOGLE_SEARCHBOX_PKG,
+                        "com.google.android.googlequicksearchbox.SearchWidgetProvider");
+                int[] widgetIds = wm.getAppWidgetIds(provider);
+                if (widgetIds != null && widgetIds.length > 0) {
+                    widgetId = widgetIds[0];
+                }
+            }
             if (widgetId != -1) {
-                AppWidgetManager wm = AppWidgetManager.getInstance(context);
                 AppWidgetProviderInfo info = wm.getAppWidgetInfo(widgetId);
                 if (info != null && info.provider.getPackageName().equals(GOOGLE_SEARCHBOX_PKG)) {
                     AppWidgetHost host = new AppWidgetHost(context, QsbContainerView.QsbFragment.QSB_WIDGET_HOST_ID);
@@ -182,7 +190,7 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
     }
 
     @Nullable
-    private View findGoogleWidgetButton(String buttonEntryName) {
+    private View findGoogleWidgetButton(String... buttonEntryNames) {
         try {
             Launcher launcher = Launcher.getLauncher(getContext());
             if (launcher == null) {
@@ -190,36 +198,36 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
             }
             Context context = getContext();
             Resources gsaRes = context.getPackageManager().getResourcesForApplication(GOOGLE_SEARCHBOX_PKG);
-            int targetId = gsaRes.getIdentifier(buttonEntryName, "id", GOOGLE_SEARCHBOX_PKG);
-            if (targetId == 0) {
-                return null;
-            }
+            for (String buttonEntryName : buttonEntryNames) {
+                int targetId = gsaRes.getIdentifier(buttonEntryName, "id", GOOGLE_SEARCHBOX_PKG);
+                if (targetId == 0) continue;
 
-            // 1. Check workspace items if widget was placed
-            if (launcher.getWorkspace() != null) {
-                final View[] result = new View[1];
-                launcher.getWorkspace().mapOverItems((info, v) -> {
-                    if (result[0] != null) return true;
-                    if (v instanceof ViewGroup) {
-                        View found = v.findViewById(targetId);
-                        if (found != null) {
-                            result[0] = found;
-                            return true;
+                // 1. Check workspace items if widget was placed
+                if (launcher.getWorkspace() != null) {
+                    final View[] result = new View[1];
+                    launcher.getWorkspace().mapOverItems((info, v) -> {
+                        if (result[0] != null) return true;
+                        if (v instanceof ViewGroup) {
+                            View found = v.findViewById(targetId);
+                            if (found != null) {
+                                result[0] = found;
+                                return true;
+                            }
                         }
+                        return false;
+                    });
+                    if (result[0] != null) {
+                        return result[0];
                     }
-                    return false;
-                });
-                if (result[0] != null) {
-                    return result[0];
                 }
-            }
 
-            // 2. Check cached QSB widget host view
-            View hidden = getHiddenGoogleWidgetView();
-            if (hidden != null) {
-                View found = hidden.findViewById(targetId);
-                if (found != null) {
-                    return found;
+                // 2. Check cached QSB widget host view
+                View hidden = getHiddenGoogleWidgetView();
+                if (hidden != null) {
+                    View found = hidden.findViewById(targetId);
+                    if (found != null) {
+                        return found;
+                    }
                 }
             }
             return null;
@@ -235,7 +243,10 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         animateClick(target);
 
         // 1. If Google Search widget is available, delegate to its search button
-        View widgetSearchBtn = findGoogleWidgetButton("googleapp_search_widget_search_btn");
+        View widgetSearchBtn = findGoogleWidgetButton(
+                "googleapp_search_widget_ghost_text_search",
+                "googleapp_search_widget_ghost_google_logo",
+                "googleapp_search_widget_search_btn");
         if (widgetSearchBtn != null) {
             widgetSearchBtn.performClick();
             return;
@@ -275,7 +286,10 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         animateClick(target);
 
         // 1. If Google Search widget is available, delegate to its mic button
-        View widgetMicBtn = findGoogleWidgetButton("googleapp_search_widget_mic_btn");
+        View widgetMicBtn = findGoogleWidgetButton(
+                "googleapp_search_widget_ghost_voice_search",
+                "googleapp_search_widget_voice_btn",
+                "googleapp_search_widget_mic_btn");
         if (widgetMicBtn != null) {
             widgetMicBtn.performClick();
             return;
@@ -319,7 +333,9 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         animateClick(target);
 
         // 1. If Google Search widget is on workspace, click its AI Mode button
-        View widgetAiBtn = findGoogleWidgetButton("googleapp_search_widget_shortcut_btn");
+        View widgetAiBtn = findGoogleWidgetButton(
+                "googleapp_search_widget_ghost_shortcut",
+                "googleapp_search_widget_shortcut_btn");
         if (widgetAiBtn != null) {
             widgetAiBtn.performClick();
             return;
@@ -356,22 +372,23 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         animateClick(target);
 
         // 1. If Google Search widget is on workspace or in host, click its Lens button
-        View widgetLensBtn = findGoogleWidgetButton("googleapp_search_widget_lens_btn");
+        View widgetLensBtn = findGoogleWidgetButton(
+                "googleapp_search_widget_ghost_lens",
+                "googleapp_search_widget_lens_btn");
         if (widgetLensBtn != null) {
             widgetLensBtn.performClick();
             return;
         }
 
         Launcher launcher = Launcher.getLauncher(context);
-        Bundle opts = getLaunchOptions(target).toBundle();
 
-        // 2. Launch via Launcher.startActivityForResult so callingPackage is set to com.android.launcher3
+        // 2. Launch via Launcher.startActivityForResultDirect (preserves com.android.launcher3 as callingPackage)
         if (launcher != null) {
             try {
                 Intent lensIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("google://lens"))
                         .setPackage(GOOGLE_SEARCHBOX_PKG);
                 lensIntent.putExtra("LensHomescreenShortcut", true);
-                launcher.startActivityForResult(lensIntent, 1027, opts);
+                launcher.startActivityForResultDirect(lensIntent, 1027, null);
                 return;
             } catch (Exception ignored) {}
 
@@ -379,8 +396,9 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
                 Intent lensIntent = new Intent();
                 lensIntent.setComponent(new ComponentName(GOOGLE_SEARCHBOX_PKG,
                         "com.google.android.apps.lens.MainActivity"));
+                lensIntent.setData(Uri.parse("google://lens"));
                 lensIntent.putExtra("LensHomescreenShortcut", true);
-                launcher.startActivityForResult(lensIntent, 1027, opts);
+                launcher.startActivityForResultDirect(lensIntent, 1027, null);
                 return;
             } catch (Exception ignored) {}
 
@@ -388,8 +406,9 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
                 Intent lensIntent = new Intent();
                 lensIntent.setComponent(new ComponentName(GOOGLE_SEARCHBOX_PKG,
                         "com.google.android.apps.search.lens.LensExportedActivity"));
+                lensIntent.setData(Uri.parse("google://lens"));
                 lensIntent.putExtra("LensHomescreenShortcut", true);
-                launcher.startActivityForResult(lensIntent, 1027, opts);
+                launcher.startActivityForResultDirect(lensIntent, 1027, null);
                 return;
             } catch (Exception ignored) {}
         }
@@ -399,7 +418,7 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
             Intent lensIntent = context.getPackageManager().getLaunchIntentForPackage(GOOGLE_LENS_PKG);
             if (lensIntent != null) {
                 lensIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(lensIntent, opts);
+                context.startActivity(lensIntent);
                 return;
             }
         } catch (Exception ignored) {}
