@@ -45,6 +45,16 @@
             android:textSize="15sp" />
 
         <ImageView
+            android:id="@+id/qsb_gemini_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_google_ai_sparkle"
+            android:contentDescription="AI Mode"
+            android:background="?android:attr/selectableItemBackgroundBorderless" />
+
+        <ImageView
             android:id="@+id/qsb_mic_icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
@@ -60,7 +70,7 @@
             android:layout_height="24dp"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="2dp"
-            android:src="@drawable/ic_google_lens_color"
+            android:src="@drawable/ic_google_lens_widget"
             android:contentDescription="@string/action_translate"
             android:background="?android:attr/selectableItemBackgroundBorderless" />
     </LinearLayout>

@@ -104,6 +104,7 @@
     <item type="id" name="hotseat_qsb_inner" />
     <item type="id" name="qsb_g_icon" />
     <item type="id" name="qsb_search_hint" />
+    <item type="id" name="qsb_gemini_icon" />
     <item type="id" name="qsb_mic_icon" />
     <item type="id" name="qsb_lens_icon" />
     <item type="id" name="smartspace_date" />

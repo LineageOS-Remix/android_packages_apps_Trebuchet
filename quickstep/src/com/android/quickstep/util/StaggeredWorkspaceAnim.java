@@ -102,7 +102,8 @@ public class StaggeredWorkspaceAnim {
             Hotseat hotseat = launcher.getHotseat();
 
             boolean staggerHotseat = false;
-            boolean staggerQsb = false;
+            boolean staggerQsb = hotseat != null && hotseat.getQsb() != null
+                    && hotseat.getQsb().getVisibility() == View.VISIBLE;
             int totalRows = grid.inv.numRows + (staggerHotseat ? 1 : 0) + (staggerQsb ? 1 : 0);
 
             // Add animation for all the visible workspace pages
@@ -125,6 +126,9 @@ public class StaggeredWorkspaceAnim {
                         addStaggeredAnimationForView(child, lp.getCellY() + 1,
                                 totalRows, duration);
                     }
+                }
+                if (staggerQsb) {
+                    addStaggeredAnimationForView(hotseat.getQsb(), 1, totalRows, duration);
                 }
             } else {
                 final int hotseatRow, qsbRow;
