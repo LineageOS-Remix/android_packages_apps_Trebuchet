@@ -618,17 +618,34 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 }
                 mFirstPagePinnedItem = null;
             }
+            CellLayout firstPage = mWorkspaceScreens.get(Workspace.FIRST_SCREEN_ID);
+            if (firstPage != null) {
+                View existingPinned = firstPage.findViewById(R.id.search_container_workspace);
+                if (existingPinned != null && existingPinned.getParent() instanceof ViewGroup) {
+                    ((ViewGroup) existingPinned.getParent()).removeView(existingPinned);
+                }
+            }
             return;
         }
 
-        // Add the first page
-        CellLayout firstPage = insertNewWorkspaceScreen(Workspace.FIRST_SCREEN_ID, getChildCount());
+        // Add the first page or reuse existing
+        CellLayout firstPage = mWorkspaceScreens.get(Workspace.FIRST_SCREEN_ID);
+        if (firstPage == null) {
+            firstPage = insertNewWorkspaceScreen(Workspace.FIRST_SCREEN_ID, 0);
+        } else {
+            View existingPinned = firstPage.findViewById(R.id.search_container_workspace);
+            if (existingPinned != null && existingPinned.getParent() instanceof ViewGroup) {
+                ((ViewGroup) existingPinned.getParent()).removeView(existingPinned);
+            }
+        }
         if (mFirstPagePinnedItem == null) {
             // In transposed layout, we add the first page pinned widget in the Grid.
             // As workspace does not touch the edges, we do not need a full
             // width first page pinned item.
             mFirstPagePinnedItem = LayoutInflater.from(getContext())
                     .inflate(R.layout.search_container_workspace, firstPage, false);
+        } else if (mFirstPagePinnedItem.getParent() instanceof ViewGroup) {
+            ((ViewGroup) mFirstPagePinnedItem.getParent()).removeView(mFirstPagePinnedItem);
         }
 
         int cellHSpan = mLauncher.getDeviceProfile().inv.numSearchContainerColumns;
