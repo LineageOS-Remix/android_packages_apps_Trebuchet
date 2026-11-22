@@ -21,7 +21,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.View;
@@ -32,9 +31,7 @@ import androidx.annotation.Nullable;
 
 import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
-import com.android.launcher3.Utilities;
 import com.android.launcher3.util.HorizontalInsettableView;
-import com.android.launcher3.util.Themes;
 
 /**
  * Pixel-style Hotseat Quick Search Bar view.
@@ -63,8 +60,6 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        updateBackground();
-
         setOnClickListener(this);
 
         View inner = findViewById(R.id.hotseat_qsb_inner);
@@ -91,26 +86,6 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         if (lens != null) {
             lens.setOnClickListener(this);
         }
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        updateBackground();
-    }
-
-    private void updateBackground() {
-        View inner = findViewById(R.id.hotseat_qsb_inner);
-        if (inner == null) return;
-        Context context = getContext();
-        boolean isDark = Utilities.isDarkTheme(context)
-                || !Themes.getAttrBoolean(context, R.attr.isWorkspaceDarkText);
-        GradientDrawable gd = new GradientDrawable();
-        gd.setShape(GradientDrawable.RECTANGLE);
-        gd.setCornerRadius(getResources().getDisplayMetrics().density * 26);
-        int bgColor = isDark ? 0xB3202124 : 0xD9F0F2F5;
-        gd.setColor(bgColor);
-        inner.setBackground(gd);
     }
 
     @Override

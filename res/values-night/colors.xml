@@ -63,6 +63,4 @@
     <color name="materialColorSecondary">@color/system_secondary_dark</color>
     <color name="materialColorTertiary">@color/system_tertiary_dark</color>
     <color name="materialColorError">@color/system_error_dark</color>
-
-    <color name="qsb_hotseat_bg">#B3202124</color>
 </resources>
