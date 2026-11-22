@@ -32,6 +32,7 @@ import com.android.app.animation.Interpolators.LINEAR
 import com.android.launcher3.Flags
 import com.android.launcher3.LauncherAnimUtils.HOTSEAT_SCALE_PROPERTY_FACTORY
 import com.android.launcher3.LauncherAnimUtils.SCALE_INDEX_WORKSPACE_STATE
+import com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY
 import com.android.launcher3.LauncherAnimUtils.WORKSPACE_SCALE_PROPERTY_FACTORY
 import com.android.launcher3.LauncherState
 import com.android.launcher3.anim.AnimatorListeners
@@ -99,12 +100,16 @@ class ScalingWorkspaceRevealAnim(
 
         val workspace = launcher.workspace
         val hotseat = launcher.hotseat
+        val qsb = hotseat.qsb
 
         var fromSize =
             if (Flags.coordinateWorkspaceScale()) {
                 // Interrupt the current animation, if any.
                 Animations.cancelOngoingAnimation(workspace)
                 Animations.cancelOngoingAnimation(hotseat)
+                if (qsb != null) {
+                    Animations.cancelOngoingAnimation(qsb)
+                }
 
                 if (workspace.scaleX != MAX_SIZE) {
                     workspace.scaleX
@@ -137,6 +142,42 @@ class ScalingWorkspaceRevealAnim(
             MAX_ALPHA,
             Interpolators.clampToProgress(LINEAR, 0f, fadeClamp),
         )
+
+        // Hotseat QSB scales and reveals alongside workspace so it bounces into place
+        if (qsb != null && qsb.visibility == View.VISIBLE) {
+            val locWorkspace = IntArray(2)
+            val locQsb = IntArray(2)
+            workspace.getLocationInWindow(locWorkspace)
+            qsb.getLocationInWindow(locQsb)
+            if (qsb.width > 0 && workspace.width > 0) {
+                qsb.pivotX = locWorkspace[0] + workspace.pivotX - locQsb[0] - qsb.translationX
+                qsb.pivotY = locWorkspace[1] + workspace.pivotY - locQsb[1] - qsb.translationY
+            } else {
+                qsb.pivotX = qsb.width / 2f
+                qsb.pivotY = qsb.height / 2f
+            }
+
+            qsb.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            val qsbFromSize =
+                if (Flags.coordinateWorkspaceScale() && qsb.scaleX != MAX_SIZE) {
+                    qsb.scaleX
+                } else {
+                    fromSize
+                }
+            animation.addFloat(
+                qsb,
+                SCALE_PROPERTY,
+                qsbFromSize,
+                MAX_SIZE,
+                SCALE_INTERPOLATOR,
+            )
+            qsb.alpha = MIN_ALPHA
+            animation.setViewAlpha(
+                qsb,
+                MAX_ALPHA,
+                Interpolators.clampToProgress(LINEAR, 0f, fadeClamp),
+            )
+        }
 
         val transitionConfig = StateAnimationConfig()
 
@@ -213,10 +254,21 @@ class ScalingWorkspaceRevealAnim(
 
                     workspace.setLayerType(View.LAYER_TYPE_NONE, null)
 
+                    val qsb = hotseat.qsb
+                    if (qsb != null) {
+                        qsb.alpha = 1.0F
+                        qsb.scaleX = 1.0F
+                        qsb.scaleY = 1.0F
+                        qsb.setLayerType(View.LAYER_TYPE_NONE, null)
+                    }
+
                     if (Flags.coordinateWorkspaceScale()) {
                         // Reset the cached animations.
                         Animations.setOngoingAnimation(workspace, animation = null)
                         Animations.setOngoingAnimation(hotseat, animation = null)
+                        if (qsb != null) {
+                            Animations.setOngoingAnimation(qsb, animation = null)
+                        }
                     }
 
                     Log.d(TAG, "alpha of workspace at the end of animation: ${workspace.alpha}")
@@ -237,6 +289,10 @@ class ScalingWorkspaceRevealAnim(
             //  centrally so each instances doesn't need to care about this coordination.
             Animations.setOngoingAnimation(launcher.workspace, animators)
             Animations.setOngoingAnimation(launcher.hotseat, animators)
+            val qsb = launcher.hotseat.qsb
+            if (qsb != null) {
+                Animations.setOngoingAnimation(qsb, animators)
+            }
         }
         animators.start()
     }
