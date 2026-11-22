@@ -2468,8 +2468,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     public @Nullable View getFirstMatchForAppClose(
             @Nullable StableViewInfo svi, String packageName,
             UserHandle user, boolean supportsAllAppsState) {
-        if (TextUtils.equals("com.google.android.googlequicksearchbox", packageName)
-                || (svi != null && svi.itemType == LauncherSettings.Favorites.ITEM_TYPE_SEARCH_ACTION)) {
+        if (TextUtils.equals("com.google.android.googlequicksearchbox", packageName)) {
             Hotseat hotseat = mWorkspace != null ? mWorkspace.getHotseat() : null;
             if (hotseat != null && hotseat.getQsb() != null && hotseat.getQsb().getVisibility() == View.VISIBLE) {
                 View inner = hotseat.getQsb().findViewById(R.id.hotseat_qsb_inner);
