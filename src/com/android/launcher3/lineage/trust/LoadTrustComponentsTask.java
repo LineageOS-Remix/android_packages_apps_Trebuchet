@@ -15,6 +15,7 @@
  */
 package com.android.launcher3.lineage.trust;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -69,7 +70,7 @@ public class LoadTrustComponentsTask extends AsyncTask<Void, Integer, List<Trust
         for (int i = 0; i < numPackages; i++) {
             ResolveInfo app = apps.get(i);
 
-            if (!mAppFilter.shouldShowApp(app.activityInfo.getComponentName())) {
+            if (!mAppFilter.shouldShowApp(new ComponentName(app.activityInfo.packageName, app.activityInfo.name))) {
                 continue;
             }
 

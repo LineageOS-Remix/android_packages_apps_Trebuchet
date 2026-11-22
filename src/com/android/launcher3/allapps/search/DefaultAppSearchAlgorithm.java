@@ -98,7 +98,7 @@ public class DefaultAppSearchAlgorithm implements SearchAlgorithm<AdapterItem> {
 
         int resultCount = 0;
         int total = apps.size();
-        UserManager userManager = UserManager.get(context);
+        UserManager userManager = context.getSystemService(UserManager.class);
         for (int i = 0; i < total && resultCount < MAX_RESULTS_COUNT; i++) {
             AppInfo info = apps.get(i);
             if (userManager.isQuietModeEnabled(info.user)) {

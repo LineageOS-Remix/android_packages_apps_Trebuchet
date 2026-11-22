@@ -32,6 +32,7 @@ import androidx.annotation.Nullable;
 
 import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
+import com.android.launcher3.Utilities;
 import com.android.launcher3.util.HorizontalInsettableView;
 import com.android.launcher3.util.Themes;
 
@@ -102,7 +103,7 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         View inner = findViewById(R.id.hotseat_qsb_inner);
         if (inner == null) return;
         Context context = getContext();
-        boolean isDark = Themes.isDarkTheme(context)
+        boolean isDark = Utilities.isDarkTheme(context)
                 || !Themes.getAttrBoolean(context, R.attr.isWorkspaceDarkText);
         GradientDrawable gd = new GradientDrawable();
         gd.setShape(GradientDrawable.RECTANGLE);

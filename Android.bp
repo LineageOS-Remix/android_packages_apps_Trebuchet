@@ -432,7 +432,6 @@ prebuilt_etc {
 //
 android_app {
     name: "Trebuchet",
-    defaults: ["launcher-non-platform-apis-defaults"],
 
     static_libs: [
         "Launcher3ResLib",
@@ -449,8 +448,8 @@ android_app {
         enabled: false,
     },
 
-    sdk_version: "current",
-    min_sdk_version: min_launcher3_sdk_version,
+    platform_apis: true,
+    min_sdk_version: "current",
     target_sdk_version: "current",
     plugins: ["dagger2-compiler"],
     privileged: true,
