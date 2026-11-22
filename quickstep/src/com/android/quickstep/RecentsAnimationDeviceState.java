@@ -396,6 +396,14 @@ public class RecentsAnimationDeviceState implements DisplayInfoChangeListener, E
      * @return whether SystemUI is in a state where we can start a system gesture.
      */
     public boolean canStartSystemGesture() {
+        long gestureDisablingStates = SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
+                | SYSUI_STATE_DEVICE_DREAMING;
+        if ((gestureDisablingStates & mSystemUiStateFlags) != 0) {
+            return false;
+        }
+        if (isGesturalNavMode()) {
+            return true;
+        }
         boolean canStartWithNavHidden = (mSystemUiStateFlags & SYSUI_STATE_NAV_BAR_HIDDEN) == 0
                 || (mSystemUiStateFlags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0
                 || mRotationTouchHelper.isTaskListFrozen();
@@ -410,7 +418,9 @@ public class RecentsAnimationDeviceState implements DisplayInfoChangeListener, E
     public boolean canStartTrackpadGesture() {
         boolean trackpadGesturesEnabled =
                 (mSystemUiStateFlags & SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED) == 0;
-        return trackpadGesturesEnabled && canStartAnyGesture();
+        long gestureDisablingStates = SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
+                | SYSUI_STATE_DEVICE_DREAMING;
+        return trackpadGesturesEnabled && (gestureDisablingStates & mSystemUiStateFlags) == 0;
     }
 
     /**
@@ -419,18 +429,9 @@ public class RecentsAnimationDeviceState implements DisplayInfoChangeListener, E
     private boolean canStartAnyGesture() {
         boolean homeOrOverviewEnabled = (mSystemUiStateFlags & SYSUI_STATE_HOME_DISABLED) == 0
                 || (mSystemUiStateFlags & SYSUI_STATE_OVERVIEW_DISABLED) == 0;
-        long gestureDisablingStates = SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED
-                        | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
-                        | SYSUI_STATE_QUICK_SETTINGS_EXPANDED
-                        | SYSUI_STATE_MAGNIFICATION_OVERLAP
-                        | SYSUI_STATE_DEVICE_DREAMING
-                        | SYSUI_STATE_DISABLE_GESTURE_SPLIT_INVOCATION
-                        | SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING;
-        long effectiveFlags = mSystemUiStateFlags;
-        if ((effectiveFlags & SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE) == 0) {
-            effectiveFlags &= ~(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED | SYSUI_STATE_QUICK_SETTINGS_EXPANDED);
-        }
-        return (gestureDisablingStates & effectiveFlags) == 0 && homeOrOverviewEnabled;
+        long gestureDisablingStates = SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
+                        | SYSUI_STATE_DEVICE_DREAMING;
+        return (gestureDisablingStates & mSystemUiStateFlags) == 0 && homeOrOverviewEnabled;
     }
 
     /**
