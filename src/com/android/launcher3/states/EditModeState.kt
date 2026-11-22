@@ -56,8 +56,7 @@ class EditModeState(id: Int) : LauncherState(id, StatsLogManager.LAUNCHER_STATE_
     }
 
     override fun getHotseatScaleAndTranslation(launcher: Launcher): ScaleAndTranslation {
-        val scale = launcher.deviceProfile.getWorkspaceSpringLoadScale(launcher)
-        return ScaleAndTranslation(scale, 0f, 0f)
+        return ScaleAndTranslation(1f, 0f, 0f)
     }
 
     override fun getWorkspaceBackgroundAlpha(launcher: Launcher): Float {
