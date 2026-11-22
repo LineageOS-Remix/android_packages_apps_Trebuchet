@@ -616,7 +616,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 if (mFirstPagePinnedItem.getParent() instanceof ViewGroup) {
                     ((ViewGroup) mFirstPagePinnedItem.getParent()).removeView(mFirstPagePinnedItem);
                 }
-                mFirstPagePinnedItem = null;
             }
             CellLayout firstPage = mWorkspaceScreens.get(Workspace.FIRST_SCREEN_ID);
             if (firstPage != null) {
@@ -639,6 +638,14 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             }
         }
         if (mFirstPagePinnedItem == null) {
+            try {
+                android.app.Fragment oldFrag = mLauncher.getFragmentManager().findFragmentByTag("qsb_view");
+                if (oldFrag != null) {
+                    mLauncher.getFragmentManager().beginTransaction().remove(oldFrag).commitNowAllowingStateLoss();
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "Error removing old qsb_view fragment", e);
+            }
             // In transposed layout, we add the first page pinned widget in the Grid.
             // As workspace does not touch the edges, we do not need a full
             // width first page pinned item.
@@ -654,7 +661,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         if (!firstPage.addViewToCellLayout(
                 mFirstPagePinnedItem, 0, R.id.search_container_workspace, lp, true)) {
             Log.e(TAG, "Failed to add to item at (0, 0) to CellLayout");
-            mFirstPagePinnedItem = null;
         }
     }
 

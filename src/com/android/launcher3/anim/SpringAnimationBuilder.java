@@ -105,7 +105,7 @@ public class SpringAnimationBuilder {
             @FloatRange(from = 0.0, to = 1.0, fromInclusive = false, toInclusive = false)
                     float dampingRatio) {
         if (dampingRatio <= 0 || dampingRatio >= 1) {
-            throw new IllegalArgumentException("Damping ratio must be between 0 and 1");
+            dampingRatio = Math.max(0.01f, Math.min(0.99f, dampingRatio));
         }
         mDampingRatio = dampingRatio;
         return this;

@@ -256,6 +256,7 @@ public class WorkspaceStateTransitionAnimation {
             float scale, FloatProperty<T> property) {
         ResourceProvider rp = DynamicResource.provider(launcher);
         float damping = rp.getFloat(R.dimen.hint_scale_damping_ratio);
+        damping = Math.max(0.01f, Math.min(0.99f, damping));
         float stiffness = rp.getFloat(R.dimen.hint_scale_stiffness);
         float velocityPxPerS = rp.getDimension(R.dimen.hint_scale_velocity_dp_per_s);
 

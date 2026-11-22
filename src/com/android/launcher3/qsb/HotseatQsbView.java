@@ -17,6 +17,10 @@
 package com.android.launcher3.qsb;
 
 import android.app.ActivityOptions;
+import android.appwidget.AppWidgetHost;
+import android.appwidget.AppWidgetHostView;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -37,7 +41,10 @@ import androidx.annotation.Nullable;
 
 import com.android.app.animation.Interpolators;
 import com.android.launcher3.Launcher;
+import com.android.launcher3.LauncherPrefs;
+import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
+import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.util.ActivityOptionsWrapper;
 import com.android.launcher3.util.HorizontalInsettableView;
 
@@ -50,6 +57,7 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
     private static final String GOOGLE_LENS_PKG = "com.google.ar.lens";
 
     private float mHorizontalInsets = 0f;
+    private AppWidgetHostView mHiddenGoogleWidgetView;
 
     public HotseatQsbView(@NonNull Context context) {
         this(context, null);
@@ -70,6 +78,10 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         View inner = findViewById(R.id.hotseat_qsb_inner);
         if (inner != null) {
             inner.setOnClickListener(this);
+            ItemInfo qsbInfo = new ItemInfo();
+            qsbInfo.itemType = LauncherSettings.Favorites.ITEM_TYPE_SEARCH_ACTION;
+            qsbInfo.container = LauncherSettings.Favorites.CONTAINER_HOTSEAT;
+            inner.setTag(qsbInfo);
         }
 
         View gIcon = findViewById(R.id.qsb_g_icon);
@@ -116,7 +128,8 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         try {
             Launcher launcher = Launcher.getLauncher(getContext());
             if (launcher != null) {
-                ActivityOptionsWrapper wrapper = launcher.getActivityLaunchOptions(v, null);
+                ItemInfo info = (v != null && v.getTag() instanceof ItemInfo) ? (ItemInfo) v.getTag() : null;
+                ActivityOptionsWrapper wrapper = launcher.getActivityLaunchOptions(v, info);
                 if (wrapper != null && wrapper.options != null) {
                     wrapper.options.setSplashScreenStyle(SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR);
                     wrapper.options.setPendingIntentLaunchFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -149,10 +162,30 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
     }
 
     @Nullable
+    private View getHiddenGoogleWidgetView() {
+        if (mHiddenGoogleWidgetView != null) {
+            return mHiddenGoogleWidgetView;
+        }
+        try {
+            Context context = getContext();
+            int widgetId = LauncherPrefs.getPrefs(context).getInt("qsb_widget_id", -1);
+            if (widgetId != -1) {
+                AppWidgetManager wm = AppWidgetManager.getInstance(context);
+                AppWidgetProviderInfo info = wm.getAppWidgetInfo(widgetId);
+                if (info != null && info.provider.getPackageName().equals(GOOGLE_SEARCHBOX_PKG)) {
+                    AppWidgetHost host = new AppWidgetHost(context, QsbContainerView.QsbFragment.QSB_WIDGET_HOST_ID);
+                    mHiddenGoogleWidgetView = host.createView(context, widgetId, info);
+                }
+            }
+        } catch (Exception ignored) {}
+        return mHiddenGoogleWidgetView;
+    }
+
+    @Nullable
     private View findGoogleWidgetButton(String buttonEntryName) {
         try {
             Launcher launcher = Launcher.getLauncher(getContext());
-            if (launcher == null || launcher.getWorkspace() == null) {
+            if (launcher == null) {
                 return null;
             }
             Context context = getContext();
@@ -161,19 +194,35 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
             if (targetId == 0) {
                 return null;
             }
-            final View[] result = new View[1];
-            launcher.getWorkspace().mapOverItems((info, v) -> {
-                if (result[0] != null) return true;
-                if (v instanceof ViewGroup) {
-                    View found = v.findViewById(targetId);
-                    if (found != null) {
-                        result[0] = found;
-                        return true;
+
+            // 1. Check workspace items if widget was placed
+            if (launcher.getWorkspace() != null) {
+                final View[] result = new View[1];
+                launcher.getWorkspace().mapOverItems((info, v) -> {
+                    if (result[0] != null) return true;
+                    if (v instanceof ViewGroup) {
+                        View found = v.findViewById(targetId);
+                        if (found != null) {
+                            result[0] = found;
+                            return true;
+                        }
                     }
+                    return false;
+                });
+                if (result[0] != null) {
+                    return result[0];
                 }
-                return false;
-            });
-            return result[0];
+            }
+
+            // 2. Check cached QSB widget host view
+            View hidden = getHiddenGoogleWidgetView();
+            if (hidden != null) {
+                View found = hidden.findViewById(targetId);
+                if (found != null) {
+                    return found;
+                }
+            }
+            return null;
         } catch (Exception ignored) {
             return null;
         }
@@ -185,9 +234,16 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         View target = inner != null ? inner : this;
         animateClick(target);
 
+        // 1. If Google Search widget is available, delegate to its search button
+        View widgetSearchBtn = findGoogleWidgetButton("googleapp_search_widget_search_btn");
+        if (widgetSearchBtn != null) {
+            widgetSearchBtn.performClick();
+            return;
+        }
+
         Bundle opts = getLaunchOptions(target).toBundle();
 
-        // 1. Try launching Google Search directly with ACTION_WEB_SEARCH targeted to Google app
+        // 2. Try launching Google Search directly with ACTION_WEB_SEARCH targeted to Google app
         try {
             Intent googleSearchIntent = new Intent(Intent.ACTION_WEB_SEARCH)
                     .setPackage(GOOGLE_SEARCHBOX_PKG)
@@ -196,7 +252,7 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
             return;
         } catch (Exception ignored) {}
 
-        // 2. Try generic ACTION_WEB_SEARCH
+        // 3. Try generic ACTION_WEB_SEARCH
         try {
             Intent searchIntent = new Intent(Intent.ACTION_WEB_SEARCH)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -204,7 +260,7 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
             return;
         } catch (Exception ignored) {}
 
-        // 3. Fallback to browser search
+        // 4. Fallback to browser search
         try {
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"))
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -218,26 +274,42 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         View target = mic != null ? mic : this;
         animateClick(target);
 
+        // 1. If Google Search widget is available, delegate to its mic button
+        View widgetMicBtn = findGoogleWidgetButton("googleapp_search_widget_mic_btn");
+        if (widgetMicBtn != null) {
+            widgetMicBtn.performClick();
+            return;
+        }
+
         Bundle opts = getLaunchOptions(target).toBundle();
 
-        // 1. Try voice search with Google package
-        Intent intent = new Intent(Intent.ACTION_VOICE_COMMAND)
-                .setPackage(GOOGLE_SEARCHBOX_PKG)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        if (context.getPackageManager().resolveActivity(intent, 0) == null) {
-            intent = new Intent("android.speech.action.WEB_SEARCH")
+        // 2. Try Google Voice Assist entrypoint (verified working on device)
+        try {
+            Intent intent = new Intent("android.intent.action.VOICE_ASSIST")
                     .setPackage(GOOGLE_SEARCHBOX_PKG)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        }
-        if (context.getPackageManager().resolveActivity(intent, 0) == null) {
-            intent = new Intent(Intent.ACTION_VOICE_COMMAND)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        }
-        try {
             context.startActivity(intent, opts);
-        } catch (Exception e) {
-            launchSearch();
-        }
+            return;
+        } catch (Exception ignored) {}
+
+        // 3. Try speech web search
+        try {
+            Intent intent = new Intent("android.speech.action.WEB_SEARCH")
+                    .setPackage(GOOGLE_SEARCHBOX_PKG)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent, opts);
+            return;
+        } catch (Exception ignored) {}
+
+        // 4. Try generic voice assist
+        try {
+            Intent intent = new Intent("android.intent.action.VOICE_ASSIST")
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent, opts);
+            return;
+        } catch (Exception ignored) {}
+
+        launchSearch();
     }
 
     private void launchGemini() {
@@ -246,9 +318,16 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         View target = gemini != null ? gemini : this;
         animateClick(target);
 
+        // 1. If Google Search widget is on workspace, click its AI Mode button
+        View widgetAiBtn = findGoogleWidgetButton("googleapp_search_widget_shortcut_btn");
+        if (widgetAiBtn != null) {
+            widgetAiBtn.performClick();
+            return;
+        }
+
         Bundle opts = getLaunchOptions(target).toBundle();
 
-        // 1. Launch Local Gemini / AI Mode in Google Search App directly
+        // 2. Launch Local Gemini / AI Mode in Google Search App directly
         try {
             Intent aiIntent = new Intent(Intent.ACTION_VIEW,
                     Uri.parse("ga:/data?tab_type=21&go_back_to_discover_feed_from_srp=false&go_back_to_inbox_from_srp=false&aim_options=CAIYACAAQABIAFAAWAA%3D"))
@@ -257,13 +336,6 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
             context.startActivity(aiIntent, opts);
             return;
         } catch (Exception ignored) {}
-
-        // 2. If Google Search widget is on workspace, click its AI Mode button
-        View widgetAiBtn = findGoogleWidgetButton("googleapp_search_widget_shortcut_btn");
-        if (widgetAiBtn != null) {
-            widgetAiBtn.performClick();
-            return;
-        }
 
         // 3. Try Gemini Gateway URL in Google Search App
         try {
@@ -283,44 +355,46 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         View target = lens != null ? lens : this;
         animateClick(target);
 
-        // 1. If Google Search widget is on workspace, click its Lens button
+        // 1. If Google Search widget is on workspace or in host, click its Lens button
         View widgetLensBtn = findGoogleWidgetButton("googleapp_search_widget_lens_btn");
         if (widgetLensBtn != null) {
             widgetLensBtn.performClick();
             return;
         }
 
+        Launcher launcher = Launcher.getLauncher(context);
         Bundle opts = getLaunchOptions(target).toBundle();
 
-        // 2. Try googleapp://lens deep-link
-        try {
-            Intent lensIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("googleapp://lens"))
-                    .setPackage(GOOGLE_SEARCHBOX_PKG)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(lensIntent, opts);
-            return;
-        } catch (Exception ignored) {}
+        // 2. Launch via Launcher.startActivityForResult so callingPackage is set to com.android.launcher3
+        if (launcher != null) {
+            try {
+                Intent lensIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("google://lens"))
+                        .setPackage(GOOGLE_SEARCHBOX_PKG);
+                lensIntent.putExtra("LensHomescreenShortcut", true);
+                launcher.startActivityForResult(lensIntent, 1027, opts);
+                return;
+            } catch (Exception ignored) {}
 
-        // 3. Try https://lens.google/trylens deep-link
-        try {
-            Intent lensIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://lens.google/trylens"))
-                    .setPackage(GOOGLE_SEARCHBOX_PKG)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(lensIntent, opts);
-            return;
-        } catch (Exception ignored) {}
+            try {
+                Intent lensIntent = new Intent();
+                lensIntent.setComponent(new ComponentName(GOOGLE_SEARCHBOX_PKG,
+                        "com.google.android.apps.lens.MainActivity"));
+                lensIntent.putExtra("LensHomescreenShortcut", true);
+                launcher.startActivityForResult(lensIntent, 1027, opts);
+                return;
+            } catch (Exception ignored) {}
 
-        // 4. Try LensExportedActivity directly
-        try {
-            Intent lensIntent = new Intent()
-                    .setComponent(new ComponentName(GOOGLE_SEARCHBOX_PKG,
-                            "com.google.android.apps.search.lens.LensExportedActivity"))
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(lensIntent, opts);
-            return;
-        } catch (Exception ignored) {}
+            try {
+                Intent lensIntent = new Intent();
+                lensIntent.setComponent(new ComponentName(GOOGLE_SEARCHBOX_PKG,
+                        "com.google.android.apps.search.lens.LensExportedActivity"));
+                lensIntent.putExtra("LensHomescreenShortcut", true);
+                launcher.startActivityForResult(lensIntent, 1027, opts);
+                return;
+            } catch (Exception ignored) {}
+        }
 
-        // 5. Standalone Lens app (com.google.ar.lens)
+        // 3. Standalone Lens app (com.google.ar.lens)
         try {
             Intent lensIntent = context.getPackageManager().getLaunchIntentForPackage(GOOGLE_LENS_PKG);
             if (lensIntent != null) {
