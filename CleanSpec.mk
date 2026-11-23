@@ -64,6 +64,8 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/product/priv-app/Launcher3Go
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/product/priv-app/Launcher3QuickStep)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/product/priv-app/Launcher3QuickStepGo)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/product/priv-app/Launcher3GoIconRecents)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system_ext/priv-app/Trebuchet)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/system_ext/priv-app/Trebuchet)
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
 # ************************************************
