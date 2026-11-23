@@ -170,7 +170,7 @@ public class QsbContainerView extends FrameLayout {
         // being inflated in the wrong orientation.
         private int mOrientation;
 
-        protected @Nullable QsbWidgetHost getHost() {
+        protected @Nullable QsbWidgetHost getQsbWidgetHost() {
             if (mQsbWidgetHost == null && getContext() != null) {
                 mQsbWidgetHost = createHost();
             }
@@ -179,7 +179,7 @@ public class QsbContainerView extends FrameLayout {
 
         @Override
         public void onInit(Bundle savedInstanceState) {
-            getHost();
+            getQsbWidgetHost();
             if (getContext() != null && getContext().getResources() != null) {
                 mOrientation = getContext().getResources().getConfiguration().orientation;
             }
@@ -201,7 +201,7 @@ public class QsbContainerView extends FrameLayout {
             mWrapper = new FrameLayout(getContext());
             // Only add the view when enabled
             if (isQsbEnabled()) {
-                QsbWidgetHost host = getHost();
+                QsbWidgetHost host = getQsbWidgetHost();
                 if (host != null) {
                     host.startListening();
                 }
@@ -231,7 +231,7 @@ public class QsbContainerView extends FrameLayout {
                 mWidgetInfo = getSearchWidgetProvider();
                 if (mWidgetInfo == null) return;
 
-                QsbWidgetHost host = getHost();
+                QsbWidgetHost host = getQsbWidgetHost();
                 if (host == null) return;
 
                 AppWidgetManager widgetManager = AppWidgetManager.getInstance(context);
@@ -284,7 +284,7 @@ public class QsbContainerView extends FrameLayout {
                     saveWidgetId(data.getIntExtra(EXTRA_APPWIDGET_ID, -1));
                     rebindFragment();
                 } else {
-                    QsbWidgetHost host = getHost();
+                    QsbWidgetHost host = getQsbWidgetHost();
                     if (host != null) {
                         host.deleteHost();
                     }
@@ -341,7 +341,7 @@ public class QsbContainerView extends FrameLayout {
                 View setupButton = v.findViewById(R.id.btn_qsb_setup);
                 setupButton.setVisibility(View.VISIBLE);
                 setupButton.setOnClickListener((v2) -> {
-                    QsbWidgetHost host = getHost();
+                    QsbWidgetHost host = getQsbWidgetHost();
                     int widgetId = host != null ? host.allocateAppWidgetId() : -1;
                     if (widgetId != -1) {
                         startActivityForResult(
