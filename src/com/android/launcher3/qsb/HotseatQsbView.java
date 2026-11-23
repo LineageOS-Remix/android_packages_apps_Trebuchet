@@ -451,8 +451,6 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
             return;
         }
 
-        Launcher launcher = Launcher.getLauncher(context);
-
         // 2. Launch via Launcher.startActivityForResultDirect (preserves com.android.launcher3 as callingPackage)
         if (launcher != null) {
             try {
