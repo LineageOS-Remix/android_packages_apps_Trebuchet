@@ -107,6 +107,7 @@ public class StaggeredWorkspaceAnim {
                     || (hotseat.getQsb() instanceof ViewGroup
                             && ((ViewGroup) hotseat.getQsb()).indexOfChild(mIgnoredView) != -1)
                     || mIgnoredView.getParent() == hotseat.getQsb()
+                    || (mIgnoredView.getParent() != null && mIgnoredView.getParent().getParent() == hotseat.getQsb())
             );
 
             boolean staggerHotseat = false;
@@ -263,7 +264,11 @@ public class StaggeredWorkspaceAnim {
     private void addStaggeredAnimationForView(View v, int row, int totalRows, long duration) {
         if (mIgnoredView != null && (mIgnoredView == v
                 || (v instanceof ViewGroup && ((ViewGroup) v).indexOfChild(mIgnoredView) != -1)
-                || mIgnoredView.getParent() == v)) {
+                || mIgnoredView.getParent() == v
+                || (mIgnoredView.getParent() != null && mIgnoredView.getParent().getParent() == v)
+                || (v.getParent() != null && v.getParent() == mIgnoredView)
+                || (v.getId() == R.id.hotseat_qsb_inner && (mIgnoredView instanceof com.android.launcher3.qsb.HotseatQsbView || mIgnoredView.getId() == R.id.hotseat_qsb_inner))
+                || (v instanceof com.android.launcher3.qsb.HotseatQsbView && (mIgnoredView instanceof com.android.launcher3.qsb.HotseatQsbView || mIgnoredView.getId() == R.id.hotseat_qsb_inner)))) {
             return;
         }
         // Invert the rows, because we stagger starting from the bottom of the screen.
@@ -300,7 +305,8 @@ public class StaggeredWorkspaceAnim {
 
         boolean isQsb = v instanceof com.android.launcher3.qsb.HotseatQsbView
                 || v.getId() == R.id.hotseat_qsb_inner
-                || (v.getParent() != null && v.getParent() instanceof com.android.launcher3.qsb.HotseatQsbView);
+                || (v.getParent() != null && v.getParent() instanceof com.android.launcher3.qsb.HotseatQsbView)
+                || (v.getParent() != null && v.getParent().getParent() instanceof com.android.launcher3.qsb.HotseatQsbView);
         if (!isQsb) {
             v.setAlpha(0);
             ObjectAnimator alpha = ObjectAnimator.ofFloat(v, View.ALPHA, 0f, 1f);

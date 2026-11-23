@@ -288,6 +288,10 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
 
     private void launchSearch() {
         Context context = getContext();
+        Launcher launcher = Launcher.getLauncher(context);
+        if (launcher != null) {
+            launcher.setLastLaunchedFromQsb(true);
+        }
         View inner = findViewById(R.id.hotseat_qsb_inner);
         View target = inner != null ? inner : this;
         animateClick(target);
@@ -331,6 +335,10 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
 
     private void launchVoiceSearch() {
         Context context = getContext();
+        Launcher launcher = Launcher.getLauncher(context);
+        if (launcher != null) {
+            launcher.setLastLaunchedFromQsb(true);
+        }
         View inner = findViewById(R.id.hotseat_qsb_inner);
         View mic = findViewById(R.id.qsb_mic_icon);
         View target = inner != null ? inner : (mic != null ? mic : this);
@@ -383,6 +391,10 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
 
     private void launchGemini() {
         Context context = getContext();
+        Launcher launcher = Launcher.getLauncher(context);
+        if (launcher != null) {
+            launcher.setLastLaunchedFromQsb(true);
+        }
         View gemini = findViewById(R.id.qsb_gemini_icon);
         View target = gemini != null ? gemini : this;
         animateClick(target);
@@ -422,6 +434,10 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
 
     private void launchLens() {
         Context context = getContext();
+        Launcher launcher = Launcher.getLauncher(context);
+        if (launcher != null) {
+            launcher.setLastLaunchedFromQsb(true);
+        }
         View lens = findViewById(R.id.qsb_lens_icon);
         View target = lens != null ? lens : this;
         animateClick(target);

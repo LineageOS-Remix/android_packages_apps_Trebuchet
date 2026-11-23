@@ -1462,6 +1462,13 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             return null;
         }
 
+        if (mLauncher.wasLastLaunchedFromQsb() && mLauncher.getHotseat() != null
+                && mLauncher.getHotseat().getQsb() != null) {
+            mLauncher.setLastLaunchedFromQsb(false);
+            View inner = mLauncher.getHotseat().getQsb().findViewById(R.id.hotseat_qsb_inner);
+            return inner != null ? inner : mLauncher.getHotseat().getQsb();
+        }
+
         final ComponentName[] taskInfoActivities = new ComponentName[]{
                 runningTaskTarget.taskInfo.baseActivity,
                 runningTaskTarget.taskInfo.origActivity,
@@ -1531,19 +1538,14 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         boolean isQsbView = launcherView != null && (
                 launcherView instanceof com.android.launcher3.qsb.HotseatQsbView
                 || launcherView.getId() == R.id.hotseat_qsb_inner
-                || (mLauncher.getHotseat() != null && launcherView == mLauncher.getHotseat().getQsb())
+                || (mLauncher.getHotseat() != null && (launcherView == mLauncher.getHotseat().getQsb()
+                        || (mLauncher.getHotseat().getQsb() instanceof ViewGroup
+                                && ((ViewGroup) mLauncher.getHotseat().getQsb()).indexOfChild(launcherView) != -1)))
+                || (launcherView.getParent() != null && mLauncher.getHotseat() != null
+                        && launcherView.getParent() == mLauncher.getHotseat().getQsb())
         );
 
-        if (launcherView instanceof LauncherAppWidgetHostView) {
-            Size windowSize = new Size(mDeviceProfile.availableWidthPx,
-                    mDeviceProfile.availableHeightPx);
-            int fallbackBackgroundColor =
-                    FloatingWidgetView.getDefaultBackgroundColor(mLauncher, runningTaskTarget);
-            floatingWidget = FloatingWidgetView.getFloatingWidgetView(mLauncher,
-                    (LauncherAppWidgetHostView) launcherView, targetRect, windowSize,
-                    mDeviceProfile.isMultiWindowMode ? 0 : getWindowCornerRadius(mLauncher),
-                    isTransluscent, fallbackBackgroundColor);
-        } else if (isQsbView) {
+        if (isQsbView) {
             View qsbTarget = launcherView.findViewById(R.id.hotseat_qsb_inner);
             if (qsbTarget == null) {
                 qsbTarget = launcherView;
@@ -1552,6 +1554,15 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             mDragLayer.getDescendantRectRelativeToSelf(qsbTarget, viewBounds);
             targetRect.set(viewBounds);
             isInHotseat = true;
+        } else if (launcherView instanceof LauncherAppWidgetHostView) {
+            Size windowSize = new Size(mDeviceProfile.availableWidthPx,
+                    mDeviceProfile.availableHeightPx);
+            int fallbackBackgroundColor =
+                    FloatingWidgetView.getDefaultBackgroundColor(mLauncher, runningTaskTarget);
+            floatingWidget = FloatingWidgetView.getFloatingWidgetView(mLauncher,
+                    (LauncherAppWidgetHostView) launcherView, targetRect, windowSize,
+                    mDeviceProfile.isMultiWindowMode ? 0 : getWindowCornerRadius(mLauncher),
+                    isTransluscent, fallbackBackgroundColor);
         } else if (launcherView != null && mAreAnimationsEnabled) {
             floatingIconView = getFloatingIconView(mLauncher, launcherView, null,
                     mLauncher.getTaskbarUIController() == null
@@ -2022,6 +2033,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             final boolean launchingFromRecents = isLaunchingFromRecents(mV, appTargets);
             final boolean skipFirstFrame;
             if (isQsbView) {
+                mLauncher.setLastLaunchedFromQsb(true);
                 composeQsbLaunchAnimator(anim, mV, appTargets,
                         wallpaperTargets, nonAppTargets, launcherClosing);
                 addCujInstrumentation(anim, Cuj.CUJ_LAUNCHER_APP_LAUNCH_FROM_WIDGET);

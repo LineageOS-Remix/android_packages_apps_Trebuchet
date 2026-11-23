@@ -121,10 +121,14 @@ public class WorkspaceRevealAnim {
         scale.setInterpolator(Interpolators.DECELERATED_EASE);
         mAnimators.play(scale);
 
-        ObjectAnimator alpha = ObjectAnimator.ofFloat(v, View.ALPHA, 0, 1f);
-        alpha.setDuration(DURATION_MS);
-        alpha.setInterpolator(Interpolators.DECELERATED_EASE);
-        mAnimators.play(alpha);
+        if (v instanceof Hotseat) {
+            v.setAlpha(1f);
+        } else {
+            ObjectAnimator alpha = ObjectAnimator.ofFloat(v, View.ALPHA, 0, 1f);
+            alpha.setDuration(DURATION_MS);
+            alpha.setInterpolator(Interpolators.DECELERATED_EASE);
+            mAnimators.play(alpha);
+        }
 
         mAnimators.addListener(new AnimatorListenerAdapter() {
             @Override

@@ -32,11 +32,13 @@ import android.os.UserHandle;
 import android.util.Size;
 import android.view.RemoteAnimationTarget;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.LauncherState;
+import com.android.launcher3.R;
 import com.android.launcher3.anim.AnimatorPlaybackController;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.states.StateAnimationConfig;
@@ -120,11 +122,65 @@ public class LauncherSwipeHandlerV2 extends AbsSwipeUpHandler<
                 }
             };
         }
+        final boolean isQsbView = workspaceView != null && (
+                workspaceView instanceof com.android.launcher3.qsb.HotseatQsbView
+                || workspaceView.getId() == R.id.hotseat_qsb_inner
+                || (mContainer.getHotseat() != null && (workspaceView == mContainer.getHotseat().getQsb()
+                        || (mContainer.getHotseat().getQsb() instanceof ViewGroup
+                                && ((ViewGroup) mContainer.getHotseat().getQsb()).indexOfChild(workspaceView) != -1)))
+                || (workspaceView.getParent() != null && mContainer.getHotseat() != null
+                        && workspaceView.getParent() == mContainer.getHotseat().getQsb())
+        );
+
+        if (isQsbView) {
+            return createQsbHomeAnimationFactory(workspaceView, targetTaskView);
+        }
         if (workspaceView instanceof LauncherAppWidgetHostView) {
             return createWidgetHomeAnimationFactory((LauncherAppWidgetHostView) workspaceView,
                     isTargetTranslucent, runningTaskTarget);
         }
         return createIconHomeAnimationFactory(workspaceView, targetTaskView);
+    }
+
+    private HomeAnimationFactory createQsbHomeAnimationFactory(
+            View workspaceView, @Nullable TaskView targetTaskView) {
+        View qsbTarget = workspaceView.findViewById(R.id.hotseat_qsb_inner);
+        if (qsbTarget == null) {
+            qsbTarget = workspaceView;
+        }
+        final Rect targetRect = new Rect();
+        mContainer.getDragLayer().getDescendantRectRelativeToSelf(qsbTarget, targetRect);
+        final RectF targetRectF = new RectF(targetRect);
+
+        return new LauncherHomeAnimationFactory() {
+            @Nullable
+            @Override
+            protected View getViewIgnoredInWorkspaceRevealAnimation() {
+                return workspaceView;
+            }
+
+            @Override
+            public boolean isInHotseat() {
+                return true;
+            }
+
+            @NonNull
+            @Override
+            public RectF getWindowTargetRect() {
+                return targetRectF;
+            }
+
+            @Override
+            public float getEndRadius(RectF cropRectF) {
+                return Math.min(targetRectF.width(), targetRectF.height()) / 2f;
+            }
+
+            @Nullable
+            @Override
+            public TaskView getTargetTaskView() {
+                return targetTaskView;
+            }
+        };
     }
 
     private HomeAnimationFactory createIconHomeAnimationFactory(
