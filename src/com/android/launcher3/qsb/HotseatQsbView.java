@@ -292,19 +292,9 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
         View target = inner != null ? inner : this;
         animateClick(target);
 
-        // 1. If Google Search widget is available, delegate to its search button
-        View widgetSearchBtn = findGoogleWidgetButton(
-                "googleapp_search_widget_ghost_text_search",
-                "googleapp_search_widget_ghost_google_logo",
-                "googleapp_search_widget_search_btn");
-        if (widgetSearchBtn != null) {
-            widgetSearchBtn.performClick();
-            return;
-        }
-
         Bundle opts = getLaunchOptions(target).toBundle();
 
-        // 2. Try launching Google Search directly with ACTION_WEB_SEARCH targeted to Google app
+        // 1. Try launching Google Search directly with ACTION_WEB_SEARCH targeted to Google app
         try {
             Intent googleSearchIntent = new Intent(Intent.ACTION_WEB_SEARCH)
                     .setPackage(GOOGLE_SEARCHBOX_PKG)
@@ -313,13 +303,23 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
             return;
         } catch (Exception ignored) {}
 
-        // 3. Try generic ACTION_WEB_SEARCH
+        // 2. Try generic ACTION_WEB_SEARCH
         try {
             Intent searchIntent = new Intent(Intent.ACTION_WEB_SEARCH)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(searchIntent, opts);
             return;
         } catch (Exception ignored) {}
+
+        // 3. Fallback: If Google Search widget is available, delegate to its search button
+        View widgetSearchBtn = findGoogleWidgetButton(
+                "googleapp_search_widget_ghost_text_search",
+                "googleapp_search_widget_ghost_google_logo",
+                "googleapp_search_widget_search_btn");
+        if (widgetSearchBtn != null) {
+            widgetSearchBtn.performClick();
+            return;
+        }
 
         // 4. Fallback to browser search
         try {
@@ -331,23 +331,18 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
 
     private void launchVoiceSearch() {
         Context context = getContext();
+        View inner = findViewById(R.id.hotseat_qsb_inner);
         View mic = findViewById(R.id.qsb_mic_icon);
-        View target = mic != null ? mic : this;
-        animateClick(target);
-
-        // 1. If Google Search widget is available, delegate to its mic button
-        View widgetMicBtn = findGoogleWidgetButton(
-                "googleapp_search_widget_ghost_voice_search",
-                "googleapp_search_widget_voice_btn",
-                "googleapp_search_widget_mic_btn");
-        if (widgetMicBtn != null) {
-            widgetMicBtn.performClick();
-            return;
+        View target = inner != null ? inner : (mic != null ? mic : this);
+        if (mic != null) {
+            animateClick(mic);
+        } else {
+            animateClick(target);
         }
 
         Bundle opts = getLaunchOptions(target).toBundle();
 
-        // 2. Try Google Voice Assist entrypoint (verified working on device)
+        // 1. Try Google Voice Assist entrypoint (verified working on device)
         try {
             Intent intent = new Intent("android.intent.action.VOICE_ASSIST")
                     .setPackage(GOOGLE_SEARCHBOX_PKG)
@@ -356,7 +351,7 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
             return;
         } catch (Exception ignored) {}
 
-        // 3. Try speech web search
+        // 2. Try speech web search
         try {
             Intent intent = new Intent("android.speech.action.WEB_SEARCH")
                     .setPackage(GOOGLE_SEARCHBOX_PKG)
@@ -364,6 +359,16 @@ public class HotseatQsbView extends FrameLayout implements HorizontalInsettableV
             context.startActivity(intent, opts);
             return;
         } catch (Exception ignored) {}
+
+        // 3. Fallback: If Google Search widget is available, delegate to its mic button
+        View widgetMicBtn = findGoogleWidgetButton(
+                "googleapp_search_widget_ghost_voice_search",
+                "googleapp_search_widget_voice_btn",
+                "googleapp_search_widget_mic_btn");
+        if (widgetMicBtn != null) {
+            widgetMicBtn.performClick();
+            return;
+        }
 
         // 4. Try generic voice assist
         try {

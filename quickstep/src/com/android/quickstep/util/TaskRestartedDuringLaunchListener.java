@@ -17,6 +17,7 @@
 package com.android.quickstep.util;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -63,9 +64,12 @@ public class TaskRestartedDuringLaunchListener implements TaskStackChangeListene
     @Override
     public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
             boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
-        if (wasVisible) {
+        if (wasVisible && task != null && task.configuration != null
+                && task.configuration.windowConfiguration.getWindowingMode() == WINDOWING_MODE_PINNED) {
             Log.d(TAG, "Detected activity restart during launch for task=" + task.taskId);
-            mTaskRestartedCallback.run();
+            if (mTaskRestartedCallback != null) {
+                mTaskRestartedCallback.run();
+            }
             unregister();
         }
     }

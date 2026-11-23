@@ -170,14 +170,25 @@ public class QsbContainerView extends FrameLayout {
         // being inflated in the wrong orientation.
         private int mOrientation;
 
-        @Override
-        public void onInit(Bundle savedInstanceState) {
-            mQsbWidgetHost = createHost();
-            mOrientation = getContext().getResources().getConfiguration().orientation;
+        protected @Nullable QsbWidgetHost getHost() {
+            if (mQsbWidgetHost == null && getContext() != null) {
+                mQsbWidgetHost = createHost();
+            }
+            return mQsbWidgetHost;
         }
 
-        protected QsbWidgetHost createHost() {
-            return new QsbWidgetHost(getContext(), QSB_WIDGET_HOST_ID,
+        @Override
+        public void onInit(Bundle savedInstanceState) {
+            getHost();
+            if (getContext() != null && getContext().getResources() != null) {
+                mOrientation = getContext().getResources().getConfiguration().orientation;
+            }
+        }
+
+        protected @Nullable QsbWidgetHost createHost() {
+            Context context = getContext();
+            if (context == null) return null;
+            return new QsbWidgetHost(context, QSB_WIDGET_HOST_ID,
                     (c) -> new QsbWidgetHostView(c), this::rebindFragment);
         }
 
@@ -190,7 +201,10 @@ public class QsbContainerView extends FrameLayout {
             mWrapper = new FrameLayout(getContext());
             // Only add the view when enabled
             if (isQsbEnabled()) {
-                mQsbWidgetHost.startListening();
+                QsbWidgetHost host = getHost();
+                if (host != null) {
+                    host.startListening();
+                }
                 mWrapper.addView(createQsb(mWrapper));
             }
             return mWrapper;
@@ -211,10 +225,14 @@ public class QsbContainerView extends FrameLayout {
 
         private void bindGoogleWidgetInBackground(ViewGroup container) {
             try {
+                if (isInPreviewMode()) return;
                 Context context = getContext();
                 if (context == null) return;
                 mWidgetInfo = getSearchWidgetProvider();
                 if (mWidgetInfo == null) return;
+
+                QsbWidgetHost host = getHost();
+                if (host == null) return;
 
                 AppWidgetManager widgetManager = AppWidgetManager.getInstance(context);
                 int widgetId = LauncherPrefs.getPrefs(context).getInt(mKeyWidgetId, -1);
@@ -224,22 +242,22 @@ public class QsbContainerView extends FrameLayout {
 
                 if (!isWidgetBound && !isInPreviewMode()) {
                     if (widgetId > -1) {
-                        mQsbWidgetHost.deleteHost();
+                        host.deleteHost();
                     }
-                    widgetId = mQsbWidgetHost.allocateAppWidgetId();
+                    widgetId = host.allocateAppWidgetId();
                     Bundle opts = createBindOptions();
                     isWidgetBound = widgetManager.bindAppWidgetIdIfAllowed(
                             widgetId, mWidgetInfo.getProfile(), mWidgetInfo.provider, opts);
                     if (isWidgetBound) {
                         saveWidgetId(widgetId);
                     } else {
-                        mQsbWidgetHost.deleteAppWidgetId(widgetId);
+                        host.deleteAppWidgetId(widgetId);
                         widgetId = -1;
                     }
                 }
 
                 if (isWidgetBound) {
-                    mQsb = (QsbWidgetHostView) mQsbWidgetHost.createView(context, widgetId, mWidgetInfo);
+                    mQsb = (QsbWidgetHostView) host.createView(context, widgetId, mWidgetInfo);
                     mQsb.setId(R.id.qsb_widget);
                     if (!isInPreviewMode()) {
                         Bundle opts = createBindOptions();
@@ -266,7 +284,10 @@ public class QsbContainerView extends FrameLayout {
                     saveWidgetId(data.getIntExtra(EXTRA_APPWIDGET_ID, -1));
                     rebindFragment();
                 } else {
-                    mQsbWidgetHost.deleteHost();
+                    QsbWidgetHost host = getHost();
+                    if (host != null) {
+                        host.deleteHost();
+                    }
                 }
             }
         }
@@ -284,7 +305,9 @@ public class QsbContainerView extends FrameLayout {
             if (sQsbWidgetView == mQsb) {
                 sQsbWidgetView = null;
             }
-            mQsbWidgetHost.stopListening();
+            if (mQsbWidgetHost != null) {
+                mQsbWidgetHost.stopListening();
+            }
             super.onDestroy();
         }
 
@@ -317,11 +340,17 @@ public class QsbContainerView extends FrameLayout {
             if (showSetupIcon) {
                 View setupButton = v.findViewById(R.id.btn_qsb_setup);
                 setupButton.setVisibility(View.VISIBLE);
-                setupButton.setOnClickListener((v2) -> startActivityForResult(
-                        new Intent(ACTION_APPWIDGET_BIND)
-                                .putExtra(EXTRA_APPWIDGET_ID, mQsbWidgetHost.allocateAppWidgetId())
-                                .putExtra(EXTRA_APPWIDGET_PROVIDER, mWidgetInfo.provider),
-                        REQUEST_BIND_QSB));
+                setupButton.setOnClickListener((v2) -> {
+                    QsbWidgetHost host = getHost();
+                    int widgetId = host != null ? host.allocateAppWidgetId() : -1;
+                    if (widgetId != -1) {
+                        startActivityForResult(
+                                new Intent(ACTION_APPWIDGET_BIND)
+                                        .putExtra(EXTRA_APPWIDGET_ID, widgetId)
+                                        .putExtra(EXTRA_APPWIDGET_PROVIDER, mWidgetInfo.provider),
+                                REQUEST_BIND_QSB);
+                    }
+                });
             }
             return v;
         }
